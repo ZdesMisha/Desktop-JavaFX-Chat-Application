@@ -3,27 +3,22 @@ package practice.chat;
 import practice.chat.protocol.shared.message.Login;
 import practice.chat.protocol.shared.message.Logout;
 import practice.chat.protocol.shared.message.MessageTemplate;
-import practice.chat.protocol.shared.message.TextMessage;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by misha on 06.05.16.
  */
 public class Chat {
 
-    Map<String, ArrayList<Client>> chatUsers = new ConcurrentHashMap<String, ArrayList<Client>>();
-    ArrayList<Client> roomUsers = new ArrayList<Client>();
-    Queue<MessageTemplate> messageQueue = new ConcurrentLinkedQueue<MessageTemplate>();
+    private Map<String, ArrayList<Client>> chatUsers = new HashMap<String, ArrayList<Client>>();
 
     public Chat() {
-        chatUsers.put("defaultRoom", roomUsers);
+        chatUsers.put("defaultRoom", new ArrayList<Client>());
     }
 
     private void broadcastMessage(MessageTemplate messageTemplate) {
@@ -32,12 +27,6 @@ public class Chat {
                 client.sendMessage(messageTemplate);
             }
         }
-    }
-
-    private MessageTemplate getMessageFromQueue() {
-        while (messageQueue.isEmpty()) {
-        }
-        return messageQueue.peek();
     }
 
     public void addUser(Socket socket) {
@@ -52,19 +41,26 @@ public class Chat {
 
     }
 
+    public void stop() {
+        for (String room : chatUsers.keySet()) {
+            for (Client client : chatUsers.get(room)) {
+                client.closeConnection();
+            }
+        }
+    }
+
     private class Client extends Thread {
 
 
         private Socket socket;
         private String name = null;
-        //private ChatRoom chatRoom;
-        private ObjectInputStream in;
         private ObjectOutputStream out;
+        private ObjectInputStream in;
+
 
         Client(Socket socket) {
             this.socket = socket;
         }
-
 
         @Override
         public void run() {
@@ -74,13 +70,6 @@ public class Chat {
                 out = new ObjectOutputStream(socket.getOutputStream());
                 in = new ObjectInputStream(socket.getInputStream());
                 System.out.println("Socket connected " + socket);
-                while (name == null) {
-                    messageTemplate = (MessageTemplate) in.readObject();
-                    name = messageTemplate.getLogin();
-                }
-
-                broadcastMessage(new Login(name));
-                System.out.println("Connected " + name);
 
                 while (true) {
                     messageTemplate = (MessageTemplate) in.readObject();
@@ -88,13 +77,12 @@ public class Chat {
                         break;
                     broadcastMessage(messageTemplate);
                 }
-                System.out.println("Disconnected " + name);
-                broadcastMessage(new Logout(name));
 
             } catch (Exception ex) {
-                System.out.println("Disconnected");
+                System.out.println("Exception in Client run method");
                 ex.printStackTrace();
             } finally {
+                broadcastMessage(new Logout(name));
                 closeConnection();
             }
         }
@@ -120,6 +108,4 @@ public class Chat {
             }
         }
     }
-
-
 }

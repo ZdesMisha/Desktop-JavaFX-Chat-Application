@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="329.0" prefWidth="445.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.ChatController">
+  <children>
+    <TextArea fx:id="textArea" editable="false" layoutX="14.0" layoutY="14.0" prefHeight="235.0" prefWidth="417.0" wrapText="true" />
+    <Button fx:id="sendButton" layoutX="348.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="83.0" text="Send" />
+    <TextField fx:id="textField" layoutX="14.0" layoutY="263.0" prefHeight="21.0" prefWidth="306.0" promptText="type your message" />
+    <Button fx:id="logoutButton" layoutX="348.0" layoutY="297.0" mnemonicParsing="false" onAction="#handleLogoutButton" prefWidth="83.0" text="Log out" />
+  </children>
+</AnchorPane>
