@@ -1,15 +1,11 @@
 package practice.chat.controller;
 
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
-import practice.chat.background.Client;
-import practice.chat.protocol.shared.message.TextMessage;
+import practice.chat.protocol.shared.message.MessageTemplate;
+import practice.chat.views.MainApp;
 
 import java.io.IOException;
 
@@ -18,34 +14,44 @@ import java.io.IOException;
  */
 public class ChatController {
 
+    @FXML
+    private TextArea chatDisplay;
+    @FXML
+    private Button sendButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private TextField field;
 
-    private Client client;
-
-    public TextArea textArea;
-    public TextField nameField;
-    public Button sendButton;
-    public Button logoutButton;
-    public Button joinInButton;
-    public TextField textField = new TextField();
     private String message;
-    private String name;
+    private MainApp mainApp;
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
+    }
 
 
     public void handleLogoutButton() {
+        mainApp.getClient().close();
+        mainApp.showLoginScene();
     }
-
-
 
     public void handleSendButton() {
         try {
-            message = textField.getText();
-            client.sendMessage(message);
-            textField.clear();
-            //sendButton.setDisable(true);
+            message = field.getText();
+            mainApp.getClient().sendTextMessage(message);
+            field.clear();
         } catch (IOException ex) {
-            textArea.appendText("No connection to server! \n");
             ex.printStackTrace();
         }
-
     }
+
+    public void displayMessage(MessageTemplate messageTemplate) {
+        chatDisplay.appendText(messageTemplate.getMessage() + "\n");
+    }
+
+    public void handleBrokenConnection(){
+        mainApp.showLoginScene();
+    }
+
 }

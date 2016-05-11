@@ -33,12 +33,10 @@ public class Chat {
         Client client = new Client(socket);
         chatUsers.get("defaultRoom").add(client);
         client.start();
-
     }
 
     public void removeUser(Client client) {
         chatUsers.get("defaultRoom").remove(client);
-
     }
 
     public void stop() {
@@ -50,7 +48,6 @@ public class Chat {
     }
 
     private class Client extends Thread {
-
 
         private Socket socket;
         private String name = null;
@@ -71,13 +68,16 @@ public class Chat {
                 in = new ObjectInputStream(socket.getInputStream());
                 System.out.println("Socket connected " + socket);
 
+                Login welcomeMessage = (Login) in.readObject();
+                name = welcomeMessage.getLogin();
+                broadcastMessage(welcomeMessage);
+
                 while (true) {
                     messageTemplate = (MessageTemplate) in.readObject();
                     if (messageTemplate == null)
                         break;
                     broadcastMessage(messageTemplate);
                 }
-
             } catch (Exception ex) {
                 System.out.println("Exception in Client run method");
                 ex.printStackTrace();
@@ -90,15 +90,12 @@ public class Chat {
         private void closeConnection() {
             try {
                 chatUsers.get("defaultRoom").remove(this);
-                in.close();
-                out.close();
                 socket.close();
             } catch (Exception ex) {
                 System.out.println("Cant close connection/streams");
                 ex.printStackTrace();
             }
         }
-
 
         public void sendMessage(MessageTemplate messageTemplate) {
             try {
