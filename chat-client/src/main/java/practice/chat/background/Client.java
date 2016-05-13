@@ -1,8 +1,10 @@
 package practice.chat.background;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.application.Platform;
 import practice.chat.controller.ChatController;
 import practice.chat.protocol.shared.message.*;
+import practice.chat.protocol.shared.persistence.ChatRoom;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -13,6 +15,7 @@ public class Client {
 
     private ServerConnection serverConnection;
     private String login;
+    private ChatRoom chatRoom;
     private ChatController chatController;
 
 
@@ -46,6 +49,14 @@ public class Client {
 
     public void sendLoginMessage() throws IOException {
         serverConnection.output.writeObject(new LoginMessage(login));
+    }
+
+    public void createNewRoom() throws IOException{
+        serverConnection.output.writeObject(new CreateNewRoomMessage());
+    }
+
+    public void changeRoom(String room) throws IOException{
+        serverConnection.output.writeObject(new ChangeRoomMessage(login,room));
     }
 
     private class ServerConnection extends Thread {
@@ -89,7 +100,9 @@ public class Client {
                 System.out.println(message);
                 System.out.println(((WhoIsOnlineMessage) message).getUserList());
                 chatController.updateUserList(((WhoIsOnlineMessage) message).getUserList());
-            } else {
+            } else if(message instanceof ChangeRoomMessage){
+                System.out.print("Room changed");
+            } else{
                 chatController.displayMessage((MessageImpl) message);
 
             }

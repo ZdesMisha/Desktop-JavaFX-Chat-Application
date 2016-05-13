@@ -1,6 +1,7 @@
 package practice.chat.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import practice.chat.main.SceneDispatcher;
@@ -22,10 +23,28 @@ public class ChatController {
     @FXML
     private TextArea userList;
 
+    public  ChoiceBox<String> roomChoice;
+
     private SceneDispatcher sceneDispatcher;
 
     public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
         this.sceneDispatcher = sceneDispatcher;
+    }
+
+    public void handleCreateRoomButton(){
+        try {
+            MainApp.client.createNewRoom();
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public void handleChangeRoomButton(){
+        try {
+            MainApp.client.changeRoom(roomChoice.getValue());
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
     }
 
 
@@ -56,6 +75,13 @@ public class ChatController {
         userList.clear();
         for (String user : users) {
             userList.appendText(user + "\n");
+        }
+    }
+
+    public void updateRoomList(ArrayList<String> rooms){
+        roomChoice.getItems().removeAll();
+        for (String room : rooms){
+            roomChoice.getItems().add(room);
         }
     }
 

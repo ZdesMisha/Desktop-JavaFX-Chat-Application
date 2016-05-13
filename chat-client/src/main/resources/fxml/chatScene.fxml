@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import javafx.collections.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -12,8 +13,12 @@
     <Button fx:id="logoutButton" layoutX="570.0" layoutY="458.0" mnemonicParsing="false" onAction="#handleLogoutButton" prefWidth="83.0" text="Log out" />
     <TextArea fx:id="userList" editable="false" layoutX="535.0" layoutY="42.0" prefHeight="366.0" prefWidth="151.0" wrapText="true" />
     <Label layoutX="570.0" layoutY="14.0" text="Users online" />
-    <Label layoutX="38.0" layoutY="17.0" text="Room:Main room" />
-    <Button id="sendButton" layoutX="174.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="112.0" text="Change room" />
-    <Button id="sendButton" layoutX="294.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="112.0" text="New room" />
+    <Button fx:id="ChangeRoomButton" layoutX="174.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleChangeRoomButton" prefWidth="112.0" text="Change room" />
+    <Button fx:id="CreateRoomButton" layoutX="305.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleCreateRoomButton" prefWidth="112.0" text="New room" />
+    <ChoiceBox id="room" fx:id="roomChoice" layoutX="66.0" layoutY="12.0">
+      <items>
+        <FXCollections fx:factory="observableArrayList" />
+      </items>
+    </ChoiceBox>
   </children>
 </AnchorPane>
