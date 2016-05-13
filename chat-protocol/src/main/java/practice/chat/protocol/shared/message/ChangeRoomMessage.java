@@ -7,6 +7,7 @@ import java.util.Date;
  */
 public class ChangeRoomMessage extends MessageImpl {
 
+
     private String room;
 
     public ChangeRoomMessage(String login, String room) {
@@ -15,4 +16,7 @@ public class ChangeRoomMessage extends MessageImpl {
         message = new Date() + "   " + login + " has left chat room.";
     }
 
+    public String getRoom() {
+        return room;
+    }
 }

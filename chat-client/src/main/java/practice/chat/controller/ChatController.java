@@ -23,7 +23,7 @@ public class ChatController {
     @FXML
     private TextArea userList;
 
-    public  ChoiceBox<String> roomChoice;
+    public ChoiceBox<String> roomChoice;
 
     private SceneDispatcher sceneDispatcher;
 
@@ -31,18 +31,22 @@ public class ChatController {
         this.sceneDispatcher = sceneDispatcher;
     }
 
-    public void handleCreateRoomButton(){
+    public void handleCreateRoomButton() {
+        userList.clear();
+        chatDisplay.clear();
         try {
-            MainApp.client.createNewRoom();
-        }catch(IOException ex){
+            MainApp.client.sendCreateRoomMessage();
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    public void handleChangeRoomButton(){
+    public void handleChangeRoomButton() {
+        userList.clear();
+        chatDisplay.clear();
         try {
-            MainApp.client.changeRoom(roomChoice.getValue());
-        }catch(IOException ex){
+            MainApp.client.sendChangeRoomMessage(roomChoice.getValue());
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -78,9 +82,9 @@ public class ChatController {
         }
     }
 
-    public void updateRoomList(ArrayList<String> rooms){
-        roomChoice.getItems().removeAll();
-        for (String room : rooms){
+    public void updateRoomList(ArrayList<String> rooms) {
+        roomChoice.getItems().clear();
+        for (String room : rooms) {
             roomChoice.getItems().add(room);
         }
     }

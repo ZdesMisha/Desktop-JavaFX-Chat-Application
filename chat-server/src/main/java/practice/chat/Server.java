@@ -23,7 +23,7 @@ public class Server {
             System.out.println("Chat server started successfully"); //TODO  logger
             while (running) {
                 Socket clientSocket = serverSocket.accept();
-                chat.addUser(clientSocket);
+                chat.addUserToMainRoom(clientSocket);
             }
         } catch (Exception ex) {
             System.out.println("Server failure"); //TODO  logger

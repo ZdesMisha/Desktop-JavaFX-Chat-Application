@@ -1,10 +1,8 @@
 package practice.chat.background;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.application.Platform;
 import practice.chat.controller.ChatController;
 import practice.chat.protocol.shared.message.*;
-import practice.chat.protocol.shared.persistence.ChatRoom;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -15,7 +13,6 @@ public class Client {
 
     private ServerConnection serverConnection;
     private String login;
-    private ChatRoom chatRoom;
     private ChatController chatController;
 
 
@@ -40,7 +37,7 @@ public class Client {
         }
     }
 
-    public void sendMessage(Message message){ //TODO ipmlement universal message sender
+    public void sendMessage(Message message) { //TODO implement universal message sender
     }
 
     public void sendTextMessage(String message) throws IOException {
@@ -51,12 +48,12 @@ public class Client {
         serverConnection.output.writeObject(new LoginMessage(login));
     }
 
-    public void createNewRoom() throws IOException{
+    public void sendCreateRoomMessage() throws IOException {
         serverConnection.output.writeObject(new CreateNewRoomMessage());
     }
 
-    public void changeRoom(String room) throws IOException{
-        serverConnection.output.writeObject(new ChangeRoomMessage(login,room));
+    public void sendChangeRoomMessage(String room) throws IOException {
+        serverConnection.output.writeObject(new ChangeRoomMessage(login, room));
     }
 
     private class ServerConnection extends Thread {
@@ -73,7 +70,6 @@ public class Client {
         public void establishConnection() throws Exception {
             address = InetAddress.getByName(IP);
             socket = new Socket(address, PORT);
-
         }
 
         public void run() {
@@ -100,9 +96,11 @@ public class Client {
                 System.out.println(message);
                 System.out.println(((WhoIsOnlineMessage) message).getUserList());
                 chatController.updateUserList(((WhoIsOnlineMessage) message).getUserList());
-            } else if(message instanceof ChangeRoomMessage){
+            } else if (message instanceof ChangeRoomMessage) {
                 System.out.print("Room changed");
-            } else{
+            } else if (message instanceof RoomListMessage) {
+                chatController.updateRoomList(((RoomListMessage) message).getRoomList());
+            } else {
                 chatController.displayMessage((MessageImpl) message);
 
             }
