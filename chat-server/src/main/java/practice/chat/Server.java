@@ -20,32 +20,38 @@ public class Server {
         try {
             serverSocket = new ServerSocket(PORT);
             chat = new Chat();
-            System.out.println("Chat server started successfully"); //TODO change to proper logger
+            System.out.println("Chat server started successfully"); //TODO  logger
             while (running) {
                 Socket clientSocket = serverSocket.accept();
                 chat.addUser(clientSocket);
             }
         } catch (Exception ex) {
+            System.out.println("Server failure"); //TODO  logger
             ex.printStackTrace();
-        }finally {
+        } finally {
             stop();
         }
     }
 
     private void stop() {
         try {
-            running=false;
+            System.out.println("1");
+            running = false;
             chat.stop();
+            System.out.println("2");
+
             serverSocket.close();
+            System.out.println("3");
+
             System.exit(0);
-        }catch(IOException ex){
+        } catch (IOException ex) {
             System.out.println("Can not stop Server correctly");
             ex.printStackTrace();
         }
     }
 
-    public static void main(String[] args) {
-        final Server server = new Server();
+    public static void main(String[] args) { //TODO implement proper exit
+        Server server = new Server();
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 server.stop();

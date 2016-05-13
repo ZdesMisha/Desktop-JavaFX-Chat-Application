@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="450.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.ChatController">
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.ChatController">
   <children>
-    <TextArea fx:id="chatDisplay" editable="false" layoutX="14.0" layoutY="14.0" prefHeight="235.0" prefWidth="417.0" wrapText="true" />
-    <Button fx:id="sendButton" layoutX="348.0" layoutY="263.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="83.0" text="Send" />
-    <TextField fx:id="field" layoutX="14.0" layoutY="263.0" prefHeight="21.0" prefWidth="306.0" promptText="type your message" />
-    <Button fx:id="logoutButton" layoutX="348.0" layoutY="297.0" mnemonicParsing="false" onAction="#handleLogoutButton" prefWidth="83.0" text="Log out" />
+    <TextArea fx:id="chatDisplay" editable="false" layoutX="28.0" layoutY="42.0" prefHeight="366.0" prefWidth="494.0" wrapText="true" />
+    <Button fx:id="sendButton" layoutX="570.0" layoutY="426.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="83.0" text="Send" />
+    <TextField fx:id="textField" layoutX="28.0" layoutY="426.0" prefHeight="32.0" prefWidth="507.0" promptText="type your message" />
+    <Button fx:id="logoutButton" layoutX="570.0" layoutY="458.0" mnemonicParsing="false" onAction="#handleLogoutButton" prefWidth="83.0" text="Log out" />
+    <TextArea fx:id="userList" editable="false" layoutX="535.0" layoutY="42.0" prefHeight="366.0" prefWidth="151.0" wrapText="true" />
+    <Label layoutX="570.0" layoutY="14.0" text="Users online" />
+    <Label layoutX="38.0" layoutY="17.0" text="Room:Main room" />
+    <Button id="sendButton" layoutX="174.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="112.0" text="Change room" />
+    <Button id="sendButton" layoutX="294.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="112.0" text="New room" />
   </children>
 </AnchorPane>

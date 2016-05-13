@@ -1,18 +1,22 @@
 package practice.chat.protocol.shared.message;
 
-import java.io.Serializable;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by misha on 05.05.16.
  */
-public class MessageTemplate implements Serializable {
+public class MessageImpl implements Message {
     String login;
     String message;
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+    String date = sdf.format(new Date());
 
-    public MessageTemplate() {
+    public MessageImpl() {
     }
 
-    public MessageTemplate(String message) {
+    public MessageImpl(String message) {
         this.message = message;
     }
 

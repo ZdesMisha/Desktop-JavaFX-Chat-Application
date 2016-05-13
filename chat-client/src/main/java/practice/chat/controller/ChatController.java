@@ -1,13 +1,14 @@
 package practice.chat.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import practice.chat.protocol.shared.message.MessageTemplate;
-import practice.chat.views.MainApp;
+import practice.chat.main.SceneDispatcher;
+import practice.chat.protocol.shared.message.MessageImpl;
+import practice.chat.main.MainApp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by misha on 06.05.16.
@@ -17,41 +18,45 @@ public class ChatController {
     @FXML
     private TextArea chatDisplay;
     @FXML
-    private Button sendButton;
+    private TextField textField;
     @FXML
-    private Button logoutButton;
-    @FXML
-    private TextField field;
+    private TextArea userList;
 
-    private String message;
-    private MainApp mainApp;
+    private SceneDispatcher sceneDispatcher;
 
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
+    public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
+        this.sceneDispatcher = sceneDispatcher;
     }
 
 
     public void handleLogoutButton() {
-        mainApp.getClient().close();
-        mainApp.showLoginScene();
+        sceneDispatcher.switchToLogin();
+        MainApp.client.close();
     }
 
     public void handleSendButton() {
+        String message = textField.getText();
         try {
-            message = field.getText();
-            mainApp.getClient().sendTextMessage(message);
-            field.clear();
+            MainApp.client.sendTextMessage(message);
+            textField.clear();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    public void displayMessage(MessageTemplate messageTemplate) {
-        chatDisplay.appendText(messageTemplate.getMessage() + "\n");
+    public void displayMessage(MessageImpl userMessage) {
+        chatDisplay.appendText(userMessage.getMessage() + "\n");
     }
 
-    public void handleBrokenConnection(){
-        mainApp.showLoginScene();
+    public void handleBrokenConnection() {
+        sceneDispatcher.switchToLogin();
+    }
+
+    public void updateUserList(ArrayList<String> users) {
+        userList.clear();
+        for (String user : users) {
+            userList.appendText(user + "\n");
+        }
     }
 
 }

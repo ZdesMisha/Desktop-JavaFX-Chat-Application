@@ -1,8 +1,8 @@
 package practice.chat;
 
-import practice.chat.protocol.shared.message.Login;
-import practice.chat.protocol.shared.message.Logout;
-import practice.chat.protocol.shared.message.MessageTemplate;
+import practice.chat.protocol.shared.message.*;
+import practice.chat.protocol.shared.message.LoginMessage;
+import practice.chat.protocol.shared.message.LogoutMessage;
 
 import java.io.*;
 import java.net.Socket;
@@ -21,39 +21,36 @@ public class Chat {
         chatUsers.put("defaultRoom", new ArrayList<Client>());
     }
 
-    private void broadcastMessage(MessageTemplate messageTemplate) {
+    private synchronized void broadcastMessage(Message message) {
         for (String room : chatUsers.keySet()) {
             for (Client client : chatUsers.get(room)) {
-                client.sendMessage(messageTemplate);
+                client.sendMessage(message);
             }
         }
     }
 
-    public void addUser(Socket socket) {
+    public synchronized void addUser(Socket socket) {
         Client client = new Client(socket);
         chatUsers.get("defaultRoom").add(client);
         client.start();
     }
 
-    public void removeUser(Client client) {
+    public synchronized void removeUser(Client client) {
         chatUsers.get("defaultRoom").remove(client);
     }
 
-    public void stop() {
+    public synchronized void stop() {
         for (String room : chatUsers.keySet()) {
-            for (Client client : chatUsers.get(room)) {
-                client.closeConnection();
-            }
+            chatUsers.get(room).forEach(Client::closeConnection);
         }
     }
 
     private class Client extends Thread {
 
         private Socket socket;
-        private String name = null;
-        private ObjectOutputStream out;
-        private ObjectInputStream in;
-
+        private String login = null;
+        private ObjectOutputStream output;
+        private ObjectInputStream input;
 
         Client(Socket socket) {
             this.socket = socket;
@@ -62,47 +59,70 @@ public class Chat {
         @Override
         public void run() {
 
-            MessageTemplate messageTemplate;
+            Message message;
             try {
-                out = new ObjectOutputStream(socket.getOutputStream());
-                in = new ObjectInputStream(socket.getInputStream());
-                System.out.println("Socket connected " + socket);
+                output = new ObjectOutputStream(socket.getOutputStream());
+                input = new ObjectInputStream(socket.getInputStream());
+                System.out.println("Connected: " + socket); //TODO logger
 
-                Login welcomeMessage = (Login) in.readObject();
-                name = welcomeMessage.getLogin();
-                broadcastMessage(welcomeMessage);
+                LoginMessage welcomeMessage = (LoginMessage) input.readObject();
+                login = welcomeMessage.getLogin();
+                processMessage(welcomeMessage);
 
                 while (true) {
-                    messageTemplate = (MessageTemplate) in.readObject();
-                    if (messageTemplate == null)
+                    message = (Message) input.readObject();
+                    System.out.println(message);
+                    if (message == null) //TODO ????
                         break;
-                    broadcastMessage(messageTemplate);
+                    processMessage(message);
                 }
             } catch (Exception ex) {
-                System.out.println("Exception in Client run method");
+                System.out.println("Exception input Client run method"); //TODO logger
                 ex.printStackTrace();
             } finally {
-                broadcastMessage(new Logout(name));
                 closeConnection();
+                System.out.println("Socket closed."); //TODO logger
+                processMessage(new LogoutMessage(login));
             }
+        }
+
+        public void processMessage(Message message) {
+            broadcastMessage(new WhoIsOnlineMessage(prepareUserList()));
+            broadcastMessage(message);
         }
 
         private void closeConnection() {
             try {
-                chatUsers.get("defaultRoom").remove(this);
+                removeUser(this);
+                output.close();
+                input.close();
                 socket.close();
             } catch (Exception ex) {
-                System.out.println("Cant close connection/streams");
+                System.out.println("Cant close connection/streams"); //TODO logger
                 ex.printStackTrace();
             }
         }
 
-        public void sendMessage(MessageTemplate messageTemplate) {
+        public void sendMessage(Message message){ //TODO how to handle send message error exception
             try {
-                out.writeObject(messageTemplate);
+                output.writeObject(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        public ArrayList<String> prepareUserList() {
+            ArrayList<String> userList = new ArrayList<>();
+            for (String room : chatUsers.keySet()) {
+                for (Client client : chatUsers.get(room)) {
+                    userList.add(client.getLogin());
+                }
+            }
+            return userList;
+        }
+
+        public String getLogin() {
+            return login;
         }
     }
 }

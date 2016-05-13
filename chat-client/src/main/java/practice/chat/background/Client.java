@@ -2,9 +2,7 @@ package practice.chat.background;
 
 import javafx.application.Platform;
 import practice.chat.controller.ChatController;
-import practice.chat.protocol.shared.message.Login;
-import practice.chat.protocol.shared.message.MessageTemplate;
-import practice.chat.protocol.shared.message.TextMessage;
+import practice.chat.protocol.shared.message.*;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -14,16 +12,16 @@ import java.net.Socket;
 public class Client {
 
     private ServerConnection serverConnection;
-    private String name;
+    private String login;
     private ChatController chatController;
 
 
-    public Client(String name, ChatController chatController) {
-        this.name = name;
+    public Client(String login, ChatController chatController) {
+        this.login = login;
         this.chatController = chatController;
     }
 
-    public void start() {
+    public void start() throws Exception {
         serverConnection = new ServerConnection();
         serverConnection.establishConnection();
         serverConnection.start();
@@ -31,39 +29,40 @@ public class Client {
 
     public void close() {
         try {
+            serverConnection.output.close();
+            serverConnection.input.close();
             serverConnection.socket.close();
         } catch (IOException ex) {
-            System.out.println("Can't close socket");
             ex.printStackTrace();
         }
     }
 
+    public void sendMessage(Message message){ //TODO ipmlement universal message sender
+    }
+
     public void sendTextMessage(String message) throws IOException {
-        serverConnection.output.writeObject(new TextMessage(name, message));
+        serverConnection.output.writeObject(new TextMessage(login, message));
     }
 
     public void sendLoginMessage() throws IOException {
-        serverConnection.output.writeObject(new Login(name));
+        serverConnection.output.writeObject(new LoginMessage(login));
     }
 
     private class ServerConnection extends Thread {
 
         private static final String IP = "127.0.0.1";
-        private static final  int PORT = 1234;
+        private static final int PORT = 1234;
+
         private Socket socket;
         private InetAddress address;
-        private MessageTemplate messageTemplate;
+        private Message message;
         private ObjectOutputStream output;
         private ObjectInputStream input;
 
-        public void establishConnection(){
-            try {
-                address = InetAddress.getByName(IP);
-                socket = new Socket(address, PORT);
-            }catch(Exception ex){
-                System.out.println("Cant establish connection. Server is offline.");
-                ex.printStackTrace();
-            }
+        public void establishConnection() throws Exception {
+            address = InetAddress.getByName(IP);
+            socket = new Socket(address, PORT);
+
         }
 
         public void run() {
@@ -73,15 +72,26 @@ public class Client {
                 input = new ObjectInputStream(socket.getInputStream());
                 sendLoginMessage();
                 while (true) {
-                    messageTemplate = (MessageTemplate) input.readObject();
-                    chatController.displayMessage(messageTemplate);
+                    message = (Message) input.readObject();
+                    processMessage(message);
                 }
             } catch (Exception ex) {
-                System.out.println("Server listener failure!");
-                Platform.runLater(() -> chatController.handleBrokenConnection());
+                System.out.println("Server listener failure!"); //TODO logger
                 ex.printStackTrace();
             } finally {
+                Platform.runLater(() -> chatController.handleBrokenConnection());
                 close();
+            }
+        }
+
+        public void processMessage(Message message) {
+            if (message instanceof WhoIsOnlineMessage) {
+                System.out.println(message);
+                System.out.println(((WhoIsOnlineMessage) message).getUserList());
+                chatController.updateUserList(((WhoIsOnlineMessage) message).getUserList());
+            } else {
+                chatController.displayMessage((MessageImpl) message);
+
             }
         }
     }

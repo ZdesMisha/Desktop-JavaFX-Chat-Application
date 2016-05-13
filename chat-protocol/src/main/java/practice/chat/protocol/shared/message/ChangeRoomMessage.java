@@ -5,8 +5,8 @@ import java.util.Date;
 /**
  * Created by misha on 05.05.16.
  */
-public class ChangeRoom extends MessageTemplate {
-    public ChangeRoom(String login) {
+public class ChangeRoomMessage extends MessageImpl {
+    public ChangeRoomMessage(String login) {
         this.login=login;
         message = new Date() + "   " + login + " has left chat room.";
     }
