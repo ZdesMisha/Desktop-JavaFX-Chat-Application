@@ -9,8 +9,16 @@
   <children>
     <Button fx:id="joinInButton" layoutX="181.0" layoutY="210.0" mnemonicParsing="false" onAction="#handleJoinInButton" prefWidth="83.0" text="Join in!" />
     <TextField fx:id="loginField" layoutX="70.0" layoutY="165.0" prefHeight="21.0" prefWidth="306.0" promptText="&quot;from 2 to 10 letters or digits&quot;" text="" />
-    <Label layoutX="169.0" layoutY="95.0" text="Welcome to Chat" />
-    <Label layoutX="70.0" layoutY="149.0" text="Your login:" />
+    <Label layoutX="151.0" layoutY="95.0" text="Welcome to Chat">
+      <font>
+        <Font name="System Bold" size="15.0" />
+      </font>
+    </Label>
+    <Label layoutX="70.0" layoutY="149.0" text="Your login:">
+      <font>
+        <Font name="System Bold" size="13.0" />
+      </font>
+    </Label>
     <Label fx:id="message" layoutX="70.0" layoutY="246.0" prefWidth="306.0" text="" textAlignment="CENTER" textFill="#ff3333">
       <font>
         <Font name="System Bold Italic" size="13.0" />

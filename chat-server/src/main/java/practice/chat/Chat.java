@@ -54,13 +54,13 @@ public class Chat {
     public void changeRoom(Client client, Room newRoom) {
         Room oldRoom = client.getRoom();
         oldRoom.removeUser(client);
+        newRoom.addUser(client);
         if (rooms.get(oldRoom.getName()).isEmptyRoom()) {
             removeRoom(oldRoom);
             broadcastChatMessage(new RoomList(prepareRoomList()));
         } else {
             oldRoom.broadcastRoomMessage(new RoomList(prepareRoomList()));
         }
-        newRoom.addUser(client);
     }
 
     public void broadcastChatMessage(Message message) {

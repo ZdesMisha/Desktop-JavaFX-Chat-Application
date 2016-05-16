@@ -19,7 +19,7 @@ public class Client {
 
     private ServerConnection serverConnection;
     private String login;
-    private String room;
+    private String room = "MainRoom";
     private ChatController chatController;
 
 
@@ -62,6 +62,9 @@ public class Client {
     public void sendChangeRoomMessage(String room) throws IOException {
         serverConnection.output.writeObject(new ChangeRoom(login, room));
     }
+    public void sendRoomRequest() throws IOException{
+        serverConnection.output.writeObject(new RoomRequest());
+    }
 
     private class ServerConnection extends Thread {
 
@@ -85,6 +88,7 @@ public class Client {
                 output = new ObjectOutputStream(socket.getOutputStream());
                 input = new ObjectInputStream(socket.getInputStream());
                 sendLoginMessage();
+                sendRoomRequest();
                 while (true) {
                     message = (Message) input.readObject();
                     processMessage(message);
@@ -107,8 +111,10 @@ public class Client {
 
                 chatController.updateRoomList(((RoomList) message).getRoomList());
 
-            } else {
-
+            } else if(message instanceof RoomRequest) {
+                room=((RoomRequest) message).getRoomName();
+                chatController.updateRoomNameLable(room);
+            } else{
                 chatController.displayMessage((MessageImplementation) message);
 
             }

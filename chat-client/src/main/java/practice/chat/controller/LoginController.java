@@ -27,6 +27,7 @@ public class LoginController {
         String login = loginField.getText();
         try {
             sceneDispatcher.switchToChat();
+            sceneDispatcher.injectLoginLabel(login);
             MainApp.client = new Client(login, sceneDispatcher.getChatController());
             MainApp.client.start();
         } catch (Exception ex) {

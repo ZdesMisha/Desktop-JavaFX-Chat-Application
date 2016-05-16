@@ -20,7 +20,7 @@
     <Label font="$x1" layoutX="570.0" layoutY="15.0" text="Users online:" textFill="#00cc21" />
     <Button fx:id="ChangeRoomButton" font="$x1" layoutX="338.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleChangeRoomButton" prefWidth="93.0" text="Change room" />
     <Button fx:id="CreateRoomButton" font="$x1" layoutX="438.0" layoutY="12.0" mnemonicParsing="false" onAction="#handleCreateRoomButton" prefWidth="83.0" text="New room" />
-    <ChoiceBox fx:id="roomChoice" layoutX="177.0" layoutY="8.0" minHeight="13.0" prefHeight="25.0" prefWidth="151.0">
+    <ChoiceBox fx:id="roomChoice" layoutX="177.0" layoutY="10.0" minHeight="13.0" prefHeight="23.0" prefWidth="151.0">
       <items>
         <FXCollections fx:factory="observableArrayList" />
       </items>
@@ -30,7 +30,11 @@
         <Font name="System Bold Italic" size="11.0" fx:id="x2" />
       </font>
     </Label>
-    <Label fx:id="login" font="$x2" layoutX="28.0" layoutY="418.0" prefWidth="160.0" text="" />
+    <Label fx:id="login" layoutX="28.0" layoutY="418.0" prefWidth="160.0" text="">
+      <font>
+        <Font name="System Bold" size="11.0" />
+      </font>
+    </Label>
     <Label fx:id="userAmount" font="$x1" layoutX="653.0" layoutY="15.0" prefWidth="33.0" text="" textFill="#00cc52" />
   </children>
 </AnchorPane>

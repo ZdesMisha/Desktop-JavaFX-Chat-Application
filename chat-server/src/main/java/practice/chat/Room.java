@@ -23,13 +23,13 @@ public class Room {
 
     public Room(Chat chat) {
         name = "Room " + roomCounter++;
-        this.chat=chat;
+        this.chat = chat;
         isMainRoom = false;
     }
 
-    public Room(String name,Chat chat) {
+    public Room(String name, Chat chat) {
         this.name = name;
-        this.chat=chat;
+        this.chat = chat;
         isMainRoom = true;
     }
 
@@ -65,6 +65,7 @@ public class Room {
         broadcastRoomMessage(new TextMessage(client.getLogin() + " has joined the chat"));
         broadcastRoomMessage(new RoomList(chat.prepareRoomList()));
         broadcastRoomMessage(new OnlineUserList(prepareUserList()));
+        client.sendMessage(new RoomRequest(this.getName())); //TODO may there is a better way to inform client about his current room?
     }
 
     public void removeUser(Client client) {

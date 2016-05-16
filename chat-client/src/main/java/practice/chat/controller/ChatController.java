@@ -28,10 +28,10 @@ public class ChatController {
     private TextArea userList;
     @FXML
     private Label userAmount;
-    @FXML
-    private Label room;
-    @FXML
-    private Label login;
+
+    public  Label room;
+
+    public Label login;
 
     public ChoiceBox<String> roomChoice;
 
@@ -105,6 +105,13 @@ public class ChatController {
             for (String room : rooms) {
                 roomChoice.getItems().add(room);
             }
+            roomChoice.setValue("MainRoom");
+        });
+    }
+
+    public void updateRoomNameLable(String roomName){
+        Platform.runLater(() -> {
+          room.setText(roomName);
         });
     }
 
