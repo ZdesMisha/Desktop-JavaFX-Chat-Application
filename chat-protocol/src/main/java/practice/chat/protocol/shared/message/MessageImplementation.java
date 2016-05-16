@@ -1,22 +1,18 @@
 package practice.chat.protocol.shared.message;
 
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Created by misha on 05.05.16.
  */
-public class MessageImpl implements Message {
+public class MessageImplementation implements Message {
     String login;
     String message;
-    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
-    String date = sdf.format(new Date());
 
-    public MessageImpl() {
+    public MessageImplementation() {
     }
 
-    public MessageImpl(String message) {
+    public MessageImplementation(String message) {
         this.message = message;
     }
 

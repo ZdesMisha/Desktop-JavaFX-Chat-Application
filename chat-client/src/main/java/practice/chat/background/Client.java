@@ -3,6 +3,12 @@ package practice.chat.background;
 import javafx.application.Platform;
 import practice.chat.controller.ChatController;
 import practice.chat.protocol.shared.message.*;
+import practice.chat.protocol.shared.message.ChangeRoom;
+import practice.chat.protocol.shared.message.CreateNewRoom;
+import practice.chat.protocol.shared.message.Login;
+import practice.chat.protocol.shared.message.MessageImplementation;
+import practice.chat.protocol.shared.message.OnlineUserList;
+import practice.chat.protocol.shared.message.RoomList;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -13,6 +19,7 @@ public class Client {
 
     private ServerConnection serverConnection;
     private String login;
+    private String room;
     private ChatController chatController;
 
 
@@ -45,15 +52,15 @@ public class Client {
     }
 
     public void sendLoginMessage() throws IOException {
-        serverConnection.output.writeObject(new LoginMessage(login));
+        serverConnection.output.writeObject(new Login(login));
     }
 
     public void sendCreateRoomMessage() throws IOException {
-        serverConnection.output.writeObject(new CreateNewRoomMessage());
+        serverConnection.output.writeObject(new CreateNewRoom());
     }
 
     public void sendChangeRoomMessage(String room) throws IOException {
-        serverConnection.output.writeObject(new ChangeRoomMessage(login, room));
+        serverConnection.output.writeObject(new ChangeRoom(login, room));
     }
 
     private class ServerConnection extends Thread {
@@ -92,16 +99,17 @@ public class Client {
         }
 
         public void processMessage(Message message) {
-            if (message instanceof WhoIsOnlineMessage) {
-                System.out.println(message);
-                System.out.println(((WhoIsOnlineMessage) message).getUserList());
-                chatController.updateUserList(((WhoIsOnlineMessage) message).getUserList());
-            } else if (message instanceof ChangeRoomMessage) {
-                System.out.print("Room changed");
-            } else if (message instanceof RoomListMessage) {
-                chatController.updateRoomList(((RoomListMessage) message).getRoomList());
+            if (message instanceof OnlineUserList) {
+
+                chatController.updateUserList(((OnlineUserList) message).getUserList());
+
+            } else if (message instanceof RoomList) {
+
+                chatController.updateRoomList(((RoomList) message).getRoomList());
+
             } else {
-                chatController.displayMessage((MessageImpl) message);
+
+                chatController.displayMessage((MessageImplementation) message);
 
             }
         }

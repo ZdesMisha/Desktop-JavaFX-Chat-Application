@@ -19,11 +19,11 @@ public class Server {
         running = true;
         try {
             serverSocket = new ServerSocket(PORT);
-            chat = new Chat();
+            chat = Chat.getInstance();
             System.out.println("Chat server started successfully"); //TODO  logger
             while (running) {
                 Socket clientSocket = serverSocket.accept();
-                chat.addUserToMainRoom(clientSocket);
+                chat.addToMainRoom(clientSocket);
             }
         } catch (Exception ex) {
             System.out.println("Server failure"); //TODO  logger

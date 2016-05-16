@@ -24,10 +24,10 @@ public class LoginController {
     }
 
     public void handleJoinInButton() {
-        String name = loginField.getText();
+        String login = loginField.getText();
         try {
             sceneDispatcher.switchToChat();
-            MainApp.client = new Client(name, sceneDispatcher.getChatController());
+            MainApp.client = new Client(login, sceneDispatcher.getChatController());
             MainApp.client.start();
         } catch (Exception ex) {
             message.setText("Can not establish connection with server");

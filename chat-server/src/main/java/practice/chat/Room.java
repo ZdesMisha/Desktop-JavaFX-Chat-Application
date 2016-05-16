@@ -2,9 +2,11 @@ package practice.chat;
 
 
 import practice.chat.protocol.shared.message.*;
+import practice.chat.protocol.shared.message.Login;
 
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Created by misha on 04.05.16.
@@ -12,23 +14,23 @@ import java.util.ArrayList;
 public class Room {
 
     private Chat chat;
-    private boolean mainRoomFlag;
+    private boolean isMainRoom;
     private static int roomCounter = 1;
     private String name;
 
     ArrayList<Client> users = new ArrayList<>();
 
+
     public Room(Chat chat) {
-        this.name = "Room " + roomCounter++;
-        mainRoomFlag = false;
-        this.chat = chat;
+        name = "Room " + roomCounter++;
+        this.chat=chat;
+        isMainRoom = false;
     }
 
-    public Room(String name, Chat chat) {
+    public Room(String name,Chat chat) {
         this.name = name;
-        roomCounter++;
-        mainRoomFlag = true;
-        this.chat = chat;
+        this.chat=chat;
+        isMainRoom = true;
     }
 
     @Override
@@ -36,18 +38,18 @@ public class Room {
         return name + " with users: " + users;
     }
 
-    public void broadcastMessage(Message message) {
+    public void broadcastRoomMessage(Message message) {
         for (Client client : users) {
             client.sendMessage(message);
         }
     }
 
-    public boolean isEmptyRoom(Room room) {
+    public boolean isEmptyRoom() {
         return users.isEmpty();
     }
 
     public boolean isMainRoom() {
-        return mainRoomFlag;
+        return isMainRoom;
     }
 
     public void addUserToMainRoom(Socket socket) {
@@ -57,16 +59,26 @@ public class Room {
         client.setRoom(chat.rooms.get("MainRoom"));
     }
 
-    public void switchUserToRoom(Room room) {
-
-    }
-
     public void addUser(Client client) {
         users.add(client);
+        client.setRoom(this);
+        broadcastRoomMessage(new TextMessage(client.getLogin() + " has joined the chat"));
+        broadcastRoomMessage(new RoomList(chat.prepareRoomList()));
+        broadcastRoomMessage(new OnlineUserList(prepareUserList()));
     }
 
     public void removeUser(Client client) {
         users.remove(client);
+        broadcastRoomMessage(new Logout(client.getLogin()));
+        broadcastRoomMessage(new OnlineUserList(prepareUserList()));
+    }
+
+    public ArrayList<String> prepareUserList() {
+        ArrayList<String> userList = new ArrayList<>();
+        for (Client user : users) {
+            userList.add(user.getLogin());
+        }
+        return userList;
     }
 
     public void stop() { //TODO impementation
@@ -84,8 +96,4 @@ public class Room {
     public ArrayList<Client> getUsers() {
         return users;
     }
-    public Room getRoomByName(String name){
-        return chat.rooms.get(name);
-    }
-
 }

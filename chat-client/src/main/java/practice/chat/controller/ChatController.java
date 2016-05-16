@@ -1,15 +1,19 @@
 package practice.chat.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import practice.chat.main.SceneDispatcher;
-import practice.chat.protocol.shared.message.MessageImpl;
+import practice.chat.protocol.shared.message.MessageImplementation;
 import practice.chat.main.MainApp;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by misha on 06.05.16.
@@ -22,10 +26,20 @@ public class ChatController {
     private TextField textField;
     @FXML
     private TextArea userList;
+    @FXML
+    private Label userAmount;
+    @FXML
+    private Label room;
+    @FXML
+    private Label login;
 
     public ChoiceBox<String> roomChoice;
 
     private SceneDispatcher sceneDispatcher;
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+
+
 
     public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
         this.sceneDispatcher = sceneDispatcher;
@@ -51,7 +65,6 @@ public class ChatController {
         }
     }
 
-
     public void handleLogoutButton() {
         sceneDispatcher.switchToLogin();
         MainApp.client.close();
@@ -67,8 +80,9 @@ public class ChatController {
         }
     }
 
-    public void displayMessage(MessageImpl userMessage) {
-        chatDisplay.appendText(userMessage.getMessage() + "\n");
+    public void displayMessage(MessageImplementation userMessage) {
+        String date = sdf.format(new Date());
+        chatDisplay.appendText("[" + date + "]\n" + userMessage.getMessage() + "\n");
     }
 
     public void handleBrokenConnection() {
@@ -76,17 +90,22 @@ public class ChatController {
     }
 
     public void updateUserList(ArrayList<String> users) {
-        userList.clear();
-        for (String user : users) {
-            userList.appendText(user + "\n");
-        }
+        Platform.runLater(() -> {
+            userList.clear();
+            for (String user : users) {
+                userList.appendText(user + "\n");
+            }
+            userAmount.setText(users.size() + "");
+        });
     }
 
     public void updateRoomList(ArrayList<String> rooms) {
-        roomChoice.getItems().clear();
-        for (String room : rooms) {
-            roomChoice.getItems().add(room);
-        }
+        Platform.runLater(() -> {
+            roomChoice.getItems().clear();
+            for (String room : rooms) {
+                roomChoice.getItems().add(room);
+            }
+        });
     }
 
 }
