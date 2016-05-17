@@ -91,6 +91,7 @@ public class Client {
                 sendRoomRequest();
                 while (true) {
                     message = (Message) input.readObject();
+                    System.out.println(message);
                     processMessage(message);
                 }
             } catch (Exception ex) {

@@ -2,11 +2,11 @@ package practice.chat;
 
 
 import practice.chat.protocol.shared.message.*;
-import practice.chat.protocol.shared.message.Login;
 
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Created by misha on 04.05.16.
@@ -18,7 +18,8 @@ public class Room {
     private static int roomCounter = 1;
     private String name;
 
-    ArrayList<Client> users = new ArrayList<>();
+    private Queue<Message> recentHistory = new LinkedList<>();
+    private ArrayList<Client> users = new ArrayList<>();
 
 
     public Room(Chat chat) {
@@ -42,9 +43,10 @@ public class Room {
         for (Client client : users) {
             client.sendMessage(message);
         }
+        saveMessageInHistory(message);
     }
 
-    public boolean isEmptyRoom() {
+    public synchronized boolean isEmptyRoom() {
         return users.isEmpty();
     }
 
@@ -52,14 +54,15 @@ public class Room {
         return isMainRoom;
     }
 
-    public void addUserToMainRoom(Socket socket) {
+    public synchronized void addUserToMainRoom(Socket socket) {
         Client client = new Client(socket, this);
-        users.add(client);
+        client.onInit(() -> sendRecentHistory(client));
         client.start();
+        users.add(client);
         client.setRoom(chat.rooms.get("MainRoom"));
     }
 
-    public void addUser(Client client) {
+    public synchronized void addUser(Client client) {
         users.add(client);
         client.setRoom(this);
         broadcastRoomMessage(new TextMessage(client.getLogin() + " has joined the chat"));
@@ -68,18 +71,31 @@ public class Room {
         client.sendMessage(new RoomRequest(this.getName())); //TODO may there is a better way to inform client about his current room?
     }
 
-    public void removeUser(Client client) {
+    public synchronized void removeUser(Client client) {
         users.remove(client);
         broadcastRoomMessage(new Logout(client.getLogin()));
         broadcastRoomMessage(new OnlineUserList(prepareUserList()));
     }
 
-    public ArrayList<String> prepareUserList() {
+    public synchronized ArrayList<String> prepareUserList() {
         ArrayList<String> userList = new ArrayList<>();
         for (Client user : users) {
             userList.add(user.getLogin());
         }
         return userList;
+    }
+
+    private synchronized void saveMessageInHistory(Message message) {
+        if (recentHistory.size() == 10) {
+            recentHistory.poll();
+        }
+        recentHistory.offer(message);
+    }
+
+    private synchronized void sendRecentHistory(Client client){
+       for(Message message:recentHistory){
+           client.sendMessage(message);
+       }
     }
 
     public void stop() { //TODO impementation
@@ -89,12 +105,8 @@ public class Room {
         return name;
     }
 
-
     public Chat getChat() {
         return chat;
     }
 
-    public ArrayList<Client> getUsers() {
-        return users;
-    }
 }
