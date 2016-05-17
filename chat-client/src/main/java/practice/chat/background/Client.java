@@ -36,9 +36,15 @@ public class Client {
 
     public void close() {
         try {
-            serverConnection.output.close();
-            serverConnection.input.close();
-            serverConnection.socket.close();
+            if (serverConnection.output != null) {
+                serverConnection.output.close();
+            }
+            if (serverConnection.input != null) {
+                serverConnection.input.close();
+            }
+            if (serverConnection.socket != null) {
+                serverConnection.socket.close();
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -47,8 +53,8 @@ public class Client {
     public void sendMessage(Message message) { //TODO implement universal message sender
     }
 
-    public void sendTextMessage(String message) throws IOException {
-        serverConnection.output.writeObject(new TextMessage(login, message));
+    public void sendTextMessage(TextMessage textMessage) throws IOException {
+        serverConnection.output.writeObject(textMessage);
     }
 
     public void sendLoginMessage() throws IOException {
@@ -62,7 +68,8 @@ public class Client {
     public void sendChangeRoomMessage(String room) throws IOException {
         serverConnection.output.writeObject(new ChangeRoom(login, room));
     }
-    public void sendRoomRequest() throws IOException{
+
+    public void sendRoomRequest() throws IOException {
         serverConnection.output.writeObject(new RoomRequest());
     }
 
@@ -87,7 +94,7 @@ public class Client {
             try {
                 output = new ObjectOutputStream(socket.getOutputStream());
                 input = new ObjectInputStream(socket.getInputStream());
-                sendLoginMessage();
+                sendLoginMessage(); //TODO if it will be work correct(there will be not other messages before login)
                 sendRoomRequest();
                 while (true) {
                     message = (Message) input.readObject();
@@ -112,10 +119,10 @@ public class Client {
 
                 chatController.updateRoomList(((RoomList) message).getRoomList());
 
-            } else if(message instanceof RoomRequest) {
-                room=((RoomRequest) message).getRoomName();
+            } else if (message instanceof RoomRequest) {
+                room = ((RoomRequest) message).getRoomName();
                 chatController.updateRoomNameLable(room);
-            } else{
+            } else {
                 chatController.displayMessage((MessageImplementation) message);
 
             }

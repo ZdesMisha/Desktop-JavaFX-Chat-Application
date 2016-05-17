@@ -21,5 +21,4 @@ public class MainApp extends Application {
         SceneDispatcher sceneDispatcher = new SceneDispatcher(stage);
         sceneDispatcher.switchToLogin();
     }
-
 }

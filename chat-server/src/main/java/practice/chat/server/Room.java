@@ -1,4 +1,4 @@
-package practice.chat;
+package practice.chat.server;
 
 
 import practice.chat.protocol.shared.message.*;
@@ -19,7 +19,7 @@ public class Room {
     private String name;
 
     private Queue<Message> recentHistory = new LinkedList<>();
-    private ArrayList<Client> users = new ArrayList<>();
+    public ArrayList<Client> users = new ArrayList<>();
 
 
     public Room(Chat chat) {
@@ -43,7 +43,6 @@ public class Room {
         for (Client client : users) {
             client.sendMessage(message);
         }
-        saveMessageInHistory(message);
     }
 
     public synchronized boolean isEmptyRoom() {
@@ -65,7 +64,9 @@ public class Room {
     public synchronized void addUser(Client client) {
         users.add(client);
         client.setRoom(this);
-        broadcastRoomMessage(new TextMessage(client.getLogin() + " has joined the chat"));
+        Message loginMessage = new TextMessage(client.getLogin() + " has joined the chat");
+        broadcastRoomMessage(loginMessage);
+        saveMessageInHistory(loginMessage);
         broadcastRoomMessage(new RoomList(chat.prepareRoomList()));
         broadcastRoomMessage(new OnlineUserList(prepareUserList()));
         client.sendMessage(new RoomRequest(this.getName())); //TODO may there is a better way to inform client about his current room?
@@ -73,7 +74,9 @@ public class Room {
 
     public synchronized void removeUser(Client client) {
         users.remove(client);
-        broadcastRoomMessage(new Logout(client.getLogin()));
+        Message logoutMessage = new Logout(client.getLogin());
+        broadcastRoomMessage(logoutMessage);
+        saveMessageInHistory(logoutMessage);
         broadcastRoomMessage(new OnlineUserList(prepareUserList()));
     }
 
@@ -85,14 +88,14 @@ public class Room {
         return userList;
     }
 
-    private synchronized void saveMessageInHistory(Message message) {
+    public synchronized void saveMessageInHistory(Message message) {
         if (recentHistory.size() == 10) {
             recentHistory.poll();
         }
         recentHistory.offer(message);
     }
 
-    private synchronized void sendRecentHistory(Client client){
+    public synchronized void sendRecentHistory(Client client){
        for(Message message:recentHistory){
            client.sendMessage(message);
        }

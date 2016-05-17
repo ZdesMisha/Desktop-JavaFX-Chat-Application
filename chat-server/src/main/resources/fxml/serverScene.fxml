@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.ServerController">
+  <children>
+    <TextArea fx:id="serverLog" editable="false" layoutX="28.0" layoutY="42.0" prefHeight="366.0" prefWidth="424.0" wrapText="true" />
+    <Button fx:id="runButton" layoutX="28.0" layoutY="440.0" mnemonicParsing="false" onAction="#handleRunButton" prefWidth="83.0" text="Run">
+      <font>
+        <Font size="11.0" fx:id="x1" />
+      </font>
+    </Button>
+    <Button fx:id="shutdownButton" font="$x1" layoutX="369.0" layoutY="440.0" mnemonicParsing="false" onAction="#handleShutdownButton" prefWidth="83.0" text="Shutdown" />
+    <Button fx:id="showHistoryButton" font="$x1" layoutX="535.0" layoutY="76.0" mnemonicParsing="false" onAction="#handleShowHistoryButton" prefWidth="93.0" text="Show" />
+    <ChoiceBox fx:id="roomChoice" layoutX="477.0" layoutY="42.0" minHeight="13.0" prefHeight="23.0" prefWidth="209.0">
+      <items>
+        <FXCollections fx:factory="observableArrayList" />
+      </items>
+    </ChoiceBox>
+    <Label layoutX="28.0" layoutY="21.0" prefWidth="160.0" text="Chat log">
+      <font>
+        <Font name="System Bold" size="11.0" fx:id="x2" />
+      </font>
+    </Label>
+    <Label id="login" alignment="CENTER" contentDisplay="CENTER" font="$x2" layoutX="502.0" layoutY="21.0" prefWidth="160.0" text="Room history" />
+  </children>
+</AnchorPane>

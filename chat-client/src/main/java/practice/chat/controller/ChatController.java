@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import practice.chat.main.SceneDispatcher;
 import practice.chat.protocol.shared.message.MessageImplementation;
 import practice.chat.main.MainApp;
+import practice.chat.protocol.shared.message.TextMessage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -73,7 +74,7 @@ public class ChatController {
     public void handleSendButton() {
         String message = textField.getText();
         try {
-            MainApp.client.sendTextMessage(message);
+            MainApp.client.sendTextMessage(new TextMessage(login.getText(),message));
             textField.clear();
         } catch (IOException ex) {
             ex.printStackTrace();

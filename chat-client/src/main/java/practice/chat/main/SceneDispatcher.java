@@ -1,5 +1,6 @@
 package practice.chat.main;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -23,6 +24,7 @@ public class SceneDispatcher {
         this.stage = stage;
         this.stage.setTitle("Chat application");
         this.stage.show();
+        this.stage.setOnCloseRequest(e -> closeApp());
     }
 
     public void switchToLogin() {
@@ -67,8 +69,13 @@ public class SceneDispatcher {
         }
     }
 
-    public void injectLoginLabel(String login){
-        chatController.login.setText(login+":");
+    private void closeApp() {
+        MainApp.client.close();
+        Platform.exit();
+    }
+
+    public void injectLoginLabel(String login) {
+        chatController.login.setText(login + ":");
     }
 
     public LoginController getLoginController() {
