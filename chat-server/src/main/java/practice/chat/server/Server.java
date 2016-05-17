@@ -15,10 +15,10 @@ public class Server extends Thread{
     private boolean running = false;
     private Chat chat;
     private ServerSocket serverSocket;
-    private ServerController serverController;
+    public static ServerController serverController;
 
-    public Server(ServerController serverController){
-        this.serverController=serverController;
+    public Server(ServerController controller){
+        serverController=controller;
     }
 
 
@@ -31,6 +31,7 @@ public class Server extends Thread{
             while (running) {
                 serverController.displayMessage("Waiting for a connection...");
                 Socket clientSocket = serverSocket.accept();
+                serverController.displayMessage("New client connected, socket: "+clientSocket);
                 chat.addToMainRoom(clientSocket);
             }
         } catch (Exception ex) {
