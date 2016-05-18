@@ -4,11 +4,13 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import practice.chat.history.HistoryManager;
+import practice.chat.main.SceneDispatcher;
 import practice.chat.main.ServerApp;
 import practice.chat.server.Server;
 
@@ -24,14 +26,29 @@ public class ServerController {
     @FXML
     private TextArea serverLog;
 
+    @FXML
+    private Button runButton;
+
+    @FXML
+    private Button shutdownButton;
+
     public ChoiceBox<String> roomChoice;
+
+    private SceneDispatcher sceneDispatcher;
+
+    public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
+        this.sceneDispatcher = sceneDispatcher;
+    }
 
 
     public void handleRunButton() {
         displayMessage("Starting server...");
-        ServerApp.server = new Server(ServerApp.serverController);
+        ServerApp.server = new Server(sceneDispatcher.getServerController());
         ServerApp.server.start();
         updateRoomList(historyManager.getHistoryFileNames());
+        runButton.setDisable(true);
+        shutdownButton.setDisable(false);
+
     }
 
     public void handleUpdateHistoryListButton(){
@@ -44,35 +61,14 @@ public class ServerController {
         displayMessage("Shutdown server...");
         ServerApp.server.shutdown();
         displayMessage("Server is down");
+        runButton.setDisable(false);
+        shutdownButton.setDisable(true);
         //     }
         // }));
     }
 
     public void handleShowHistoryButton() {
-        Stage window = new Stage();
-        window.setTitle("Room history");
-        window.setMinWidth(250);
-        window.setMinHeight(500);
-
-        TextArea textArea = new TextArea();
-        textArea.setEditable(false);
-        textArea.setMinHeight(490);
-        textArea.setMinWidth(240);
-
-        VBox layout = new VBox(10);
-        layout.getChildren().addAll(textArea);
-        layout.setAlignment(Pos.CENTER);
-        Scene scene = new Scene(layout);
-        window.setScene(scene);
-        displayHistory(textArea);
-        window.show();
-    }
-
-    public void displayHistory(TextArea textArea) {
-        String room = roomChoice.getValue();
-        for (String line : historyManager.getRoomHistory(room)){
-            textArea.appendText(line+"\n");
-        }
+        sceneDispatcher.openHistoryWindow();
     }
 
     public void displayMessage(String message) {

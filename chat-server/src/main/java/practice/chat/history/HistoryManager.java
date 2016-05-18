@@ -3,8 +3,11 @@ package practice.chat.history;
 import practice.chat.protocol.shared.message.MessageImplementation;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Created by misha on 18.05.16.
@@ -14,8 +17,9 @@ public class HistoryManager {
     private final String HOME_DIR = System.getProperty("user.home");
     private final String HISTORY_DIR_NAME = "ChatHistory";
     private final String HISTORY_PATH = HOME_DIR + File.separator + HISTORY_DIR_NAME;
+    private final int RECORDS_PER_PAGE = 5;
 
-    public static HistoryManager getInstance(){
+    public static HistoryManager getInstance() {
         return new HistoryManager();
     }
 
@@ -30,7 +34,7 @@ public class HistoryManager {
             if (!roomFile.exists()) {
                 roomFile.createNewFile();
             }
-            output = new BufferedWriter(new FileWriter(roomFile,true));
+            output = new BufferedWriter(new FileWriter(roomFile, true));
             for (MessageImplementation message : history) {
                 output.write(message.getMessage() + "\n");
             }
@@ -49,30 +53,29 @@ public class HistoryManager {
         //TODO need to update room list in Server UI
     }
 
-    public ArrayList<String> getRoomHistory(String room) {
+
+//    try (Stream<String> lines = Files.lines(Paths.get("file.txt"))) {
+//        line32 = lines.skip(31).findFirst().get();
+//    }
+
+
+    public ArrayList<String> getRoomHistory(String room, int page) {
         File file = new File(HISTORY_PATH + File.separator + room);
+        long startRecord = RECORDS_PER_PAGE * (page - 1) + 1;
+        int readsCounter=0;
         ArrayList<String> history = new ArrayList<>();
-        BufferedReader input = null;
         try {
             if (file.exists()) {
-                input = new BufferedReader(new FileReader(file));
-                String line;
-                while ((line = input.readLine()) != null) {
-                    history.add(line);
+                Iterator<String> iterator = Files.lines(Paths.get(HISTORY_PATH + File.separator + room)).skip(startRecord-1).iterator();
+                while(iterator.hasNext() && readsCounter<RECORDS_PER_PAGE){
+                    readsCounter++;
+                    history.add(iterator.next());
                 }
             }
             return history;
         } catch (IOException ex) {
             ex.printStackTrace();
             return history;
-        } finally {
-            try {
-                if (input != null) {
-                    input.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
@@ -84,6 +87,11 @@ public class HistoryManager {
         }
         list = new ArrayList<>(Arrays.asList(dir.list()));
         return list;
+    }
+
+    public static void main(String[] args){
+        HistoryManager hm = new HistoryManager();
+        hm.getRoomHistory("MainRoom",2);
     }
 }
 

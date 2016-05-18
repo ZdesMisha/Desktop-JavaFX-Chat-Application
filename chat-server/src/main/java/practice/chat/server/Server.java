@@ -15,7 +15,7 @@ public class Server extends Thread{
     private boolean running = false;
     private Chat chat;
     private ServerSocket serverSocket;
-    public static ServerController serverController;
+    public  ServerController serverController;
 
     public Server(ServerController controller){
         serverController=controller;
