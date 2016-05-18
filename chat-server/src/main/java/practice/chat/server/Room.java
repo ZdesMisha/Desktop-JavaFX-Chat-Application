@@ -1,14 +1,11 @@
 package practice.chat.server;
 
 
+import practice.chat.history.HistoryManager;
 import practice.chat.protocol.shared.message.*;
 
-import java.io.File;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by misha on 04.05.16.
@@ -19,10 +16,9 @@ public class Room {
     private boolean isMainRoom;
     private static int roomCounter = 1;
     private String name;
-    private PrintWriter historyWriter;
-    private File file;
+    private HistoryManager historyManager = HistoryManager.getInstance();
 
-    private List<MessageImplementation> recentHistory = new LinkedList<>();
+    private ArrayList<MessageImplementation> recentHistory = new ArrayList<>();
     public ArrayList<Client> users = new ArrayList<>();
 
 
@@ -94,7 +90,7 @@ public class Room {
 
     public synchronized void saveMessageInQueue(Message message) {
         if (recentHistory.size() > 10) {
-            saveHistoryToFile(recentHistory);
+            historyManager.writeHistoryToFile(recentHistory,this.getName());
             recentHistory.clear();
         }
         recentHistory.add((MessageImplementation) message);
@@ -111,21 +107,6 @@ public class Room {
                 client.sendMessage(message);
             }
         }
-    }
-
-    public synchronized void saveHistoryToFile(List<MessageImplementation> history) {
-        file = new File("/home/misha/ChatHistory/" + name + ".txt"); //TODO IMPLEMENT PROPER HISTORY DIR INSTEAD OF THIS SHIT!
-        try {
-            historyWriter = new PrintWriter(file);
-            for (MessageImplementation message : history) {
-                historyWriter.write(message.getMessage() + "\n");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-            historyWriter.close();
-        }
-        Server.serverController.updateRoomList(chat.prepareRoomList()); ///TODO fix
     }
 
     public String getName() {

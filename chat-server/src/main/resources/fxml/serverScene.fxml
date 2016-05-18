@@ -8,13 +8,13 @@
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.ServerController">
   <children>
-    <TextArea fx:id="serverLog" editable="false" layoutX="28.0" layoutY="42.0" prefHeight="366.0" prefWidth="424.0" wrapText="true" />
-    <Button fx:id="runButton" layoutX="28.0" layoutY="440.0" mnemonicParsing="false" onAction="#handleRunButton" prefWidth="83.0" text="Run">
+    <TextArea fx:id="serverLog" editable="false" layoutX="28.0" layoutY="42.0" prefHeight="416.0" prefWidth="424.0" wrapText="true" />
+    <Button fx:id="runButton" layoutX="540.0" layoutY="401.0" mnemonicParsing="false" onAction="#handleRunButton" prefWidth="83.0" text="Start">
       <font>
         <Font size="11.0" fx:id="x1" />
       </font>
     </Button>
-    <Button fx:id="shutdownButton" font="$x1" layoutX="369.0" layoutY="440.0" mnemonicParsing="false" onAction="#handleShutdownButton" prefWidth="83.0" text="Shutdown" />
+    <Button fx:id="shutdownButton" font="$x1" layoutX="540.0" layoutY="432.0" mnemonicParsing="false" onAction="#handleShutdownButton" prefWidth="83.0" text="Shutdown" />
     <Button fx:id="showHistoryButton" font="$x1" layoutX="535.0" layoutY="76.0" mnemonicParsing="false" onAction="#handleShowHistoryButton" prefWidth="93.0" text="Show" />
     <ChoiceBox fx:id="roomChoice" layoutX="477.0" layoutY="42.0" minHeight="13.0" prefHeight="23.0" prefWidth="209.0">
       <items>
@@ -27,5 +27,6 @@
       </font>
     </Label>
     <Label id="login" alignment="CENTER" contentDisplay="CENTER" font="$x2" layoutX="502.0" layoutY="21.0" prefWidth="160.0" text="Room history" />
+    <Button id="updateHistoryListButton" font="$x1" layoutX="516.0" layoutY="107.0" mnemonicParsing="false" onAction="#handleUpdateHistoryListButton" prefWidth="132.0" text="Update history list" />
   </children>
 </AnchorPane>
