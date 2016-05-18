@@ -51,12 +51,12 @@ public class ServerController {
 
     }
 
-    public void handleUpdateHistoryListButton(){
+    public void handleUpdateHistoryListButton() {
         updateRoomList(historyManager.getHistoryFileNames());
     }
 
     public void handleShutdownButton() {
-        // Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() { //TODO implement it somethere...
+        // Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() { //TODO implement it somewhere...
         //    public void run() {
         displayMessage("Shutdown server...");
         ServerApp.server.shutdown();
@@ -84,8 +84,6 @@ public class ServerController {
             roomChoice.setValue("MainRoom");
         });
     }
-
-
 
 
 }

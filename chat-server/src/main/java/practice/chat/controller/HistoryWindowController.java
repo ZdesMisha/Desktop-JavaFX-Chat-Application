@@ -44,7 +44,7 @@ public class HistoryWindowController {
     public void handlePreviousButton() {
         if (page <= 1) {
             previousButton.setDisable(true);
-        }else{
+        } else {
             page--;
         }
         displayHistory();

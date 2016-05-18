@@ -15,7 +15,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 
 
-public class Client {
+public class Client { //TODO consider if this class is really matters
 
     private ServerConnection serverConnection;
     private String login;
@@ -121,7 +121,7 @@ public class Client {
 
             } else if (message instanceof RoomRequest) {
                 room = ((RoomRequest) message).getRoomName();
-                chatController.updateRoomNameLable(room);
+                chatController.updateRoomNameLabel(room);
             } else {
                 chatController.displayMessage((MessageImplementation) message);
 

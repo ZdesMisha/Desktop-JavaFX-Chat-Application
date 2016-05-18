@@ -23,56 +23,68 @@ public class Chat {
         return chat;
     }
 
-    public Map<String, Room> rooms = new HashMap<>();
+    public final Map<String, Room> rooms = new HashMap<>();
 
     public Chat() {
         rooms.put("MainRoom", new Room("MainRoom", this));
     }
 
     public void addToMainRoom(Socket socket) {
-        rooms.get("MainRoom").addUserToMainRoom(socket);
+        synchronized (rooms) {
+            rooms.get("MainRoom").addUserToMainRoom(socket);
+        }
     }
 
-    public synchronized void stop() {
-        for (Room room : rooms.values()) {
-            for (Client client : room.users) {
-                client.closeConnection();
+    public void stop() {
+        synchronized (rooms) {
+            for (Room room : rooms.values()) {
+                room.closeClientConnections();
             }
         }
     }
 
-    public synchronized void createNewRoom(Client client) {
+    public void createNewRoom(Client client) {
         Room newRoom = new Room(this);
-        rooms.put(newRoom.getName(), newRoom);
+        synchronized (rooms) {
+            rooms.put(newRoom.getName(), newRoom);
+        }
         changeRoom(client, newRoom);
     }
 
-    public synchronized void removeRoom(Room room) {
+    public void removeRoom(Room room) {
         String roomName = room.getName();
-        if (rooms.get(roomName).isMainRoom()) {
-            return;
+        synchronized (rooms) {
+            if (rooms.get(roomName).isMainRoom()) {
+                return;
+            }
+            rooms.remove(roomName);
         }
-        rooms.remove(roomName);
     }
 
-    public synchronized void changeRoom(Client client, Room newRoom) {
+    public void changeRoom(Client client, Room newRoom) {
         Room oldRoom = client.getRoom();
         oldRoom.removeUser(client);
         newRoom.addUser(client);
-        if (rooms.get(oldRoom.getName()).isEmptyRoom()) {
-            removeRoom(oldRoom);
-            broadcastChatMessage(new RoomList(prepareRoomList()));
+        synchronized (rooms) {
+            if (rooms.get(oldRoom.getName()).isEmptyRoom()) {
+                removeRoom(oldRoom);
+                broadcastChatMessage(new RoomList(prepareRoomList()));
+            }
         }
     }
 
-    public synchronized void broadcastChatMessage(Message message) {
-        for (Room room : rooms.values()) {
-            room.broadcastRoomMessage(message);
+    public void broadcastChatMessage(Message message) {
+        synchronized (rooms) {
+            for (Room room : rooms.values()) {
+                room.broadcastRoomMessage(message);
+            }
         }
     }
 
-    public synchronized ArrayList<String> prepareRoomList() {
-        Set<String> roomSet = rooms.keySet();//TODO do something with it
-        return new ArrayList<>(roomSet);
+    public ArrayList<String> prepareRoomList() {
+        synchronized (rooms) {
+            Set<String> roomSet = rooms.keySet();//TODO do something with it
+            return new ArrayList<>(roomSet);
+        }
     }
 }

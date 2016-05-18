@@ -18,8 +18,8 @@ public class Room {
     private String name;
     private HistoryManager historyManager = HistoryManager.getInstance();
 
-    private ArrayList<MessageImplementation> recentHistory = new ArrayList<>();
-    public ArrayList<Client> users = new ArrayList<>();
+    private final ArrayList<MessageImplementation> recentHistory = new ArrayList<>();
+    private final ArrayList<Client> users = new ArrayList<>();
 
 
     public Room(Chat chat) {
@@ -40,25 +40,33 @@ public class Room {
     }
 
     public void broadcastRoomMessage(Message message) {
-        for (Client client : users) {
-            client.sendMessage(message);
+        synchronized (users) {
+            for (Client client : users) {
+                client.sendMessage(message);
+            }
         }
     }
 
     public synchronized boolean isEmptyRoom() {
-        return users.isEmpty();
+        synchronized (users) {
+            return users.isEmpty();
+        }
     }
 
     public boolean isMainRoom() {
         return isMainRoom;
     }
 
-    public synchronized void addUserToMainRoom(Socket socket) {
+    public void addUserToMainRoom(Socket socket) {
         Client client = new Client(socket, this);
         client.onInit(() -> sendRecentMessages(client));
         client.start();
-        users.add(client);
-        client.setRoom(chat.rooms.get("MainRoom"));
+        synchronized (users) {
+            users.add(client);
+        }
+        synchronized (chat.rooms) {
+            client.setRoom(chat.rooms.get("MainRoom"));
+        }
     }
 
     public synchronized void addUser(Client client) {
@@ -72,8 +80,10 @@ public class Room {
         client.sendMessage(new RoomRequest(this.getName())); //TODO may there is a better way to inform client about his current room?
     }
 
-    public synchronized void removeUser(Client client) {
-        users.remove(client);
+    public void removeUser(Client client) {
+        synchronized (users) {
+            users.remove(client);
+        }
         Message logoutMessage = new Logout(client.getLogin());
         broadcastRoomMessage(logoutMessage);
         saveMessageInQueue(logoutMessage);
@@ -88,16 +98,20 @@ public class Room {
         return userList;
     }
 
-    public synchronized void saveMessageInQueue(Message message) {
-        if (recentHistory.size() > 10) {
-            historyManager.writeHistoryToFile(recentHistory,this.getName());
-            recentHistory.clear();
+    public void saveMessageInQueue(Message message) {
+        synchronized (recentHistory) {
+            if (recentHistory.size() > 20) {
+                historyManager.writeHistoryToFile(recentHistory, this.getName()); //TODO may here is a better solution
+                ArrayList<MessageImplementation> temp = (ArrayList<MessageImplementation>)recentHistory.subList(recentHistory.size()-10,recentHistory.size()-1);
+                recentHistory.clear();
+                recentHistory.addAll(temp);
+            }
+            recentHistory.add((MessageImplementation) message);
         }
-        recentHistory.add((MessageImplementation) message);
     }
 
     public synchronized void sendRecentMessages(Client client) {
-        int size = recentHistory.size(); //TODO fix
+        int size = recentHistory.size(); //TODO may here is a better solution
         if (size > 10) {
             for (int i = 1; i < 10; i++) {
                 client.sendMessage(recentHistory.get(size - i));
@@ -113,4 +127,7 @@ public class Room {
         return name;
     }
 
+    public void closeClientConnections() {
+        users.forEach(Client::closeConnection);
+    }
 }

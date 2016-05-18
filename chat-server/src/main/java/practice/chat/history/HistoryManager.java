@@ -12,7 +12,7 @@ import java.util.Iterator;
 /**
  * Created by misha on 18.05.16.
  */
-public class HistoryManager {
+public class HistoryManager { //TODO does it should provide new instance for each request or singleton will be enough?
 
     private final String HOME_DIR = System.getProperty("user.home");
     private final String HISTORY_DIR_NAME = "ChatHistory";
@@ -23,7 +23,7 @@ public class HistoryManager {
         return new HistoryManager();
     }
 
-    public void writeHistoryToFile(ArrayList<MessageImplementation> history, String room) {
+    public void writeHistoryToFile(ArrayList<MessageImplementation> history, String room) { //TODO may be it would be better to implement using NIO?
         File dir = new File(HISTORY_PATH);
         File roomFile = new File(HISTORY_PATH + File.separator + room);
         BufferedWriter output = null;
@@ -53,21 +53,15 @@ public class HistoryManager {
         //TODO need to update room list in Server UI
     }
 
-
-//    try (Stream<String> lines = Files.lines(Paths.get("file.txt"))) {
-//        line32 = lines.skip(31).findFirst().get();
-//    }
-
-
     public ArrayList<String> getRoomHistory(String room, int page) {
         File file = new File(HISTORY_PATH + File.separator + room);
         long startRecord = RECORDS_PER_PAGE * (page - 1) + 1;
-        int readsCounter=0;
+        int readsCounter = 0;
         ArrayList<String> history = new ArrayList<>();
         try {
             if (file.exists()) {
-                Iterator<String> iterator = Files.lines(Paths.get(HISTORY_PATH + File.separator + room)).skip(startRecord-1).iterator();
-                while(iterator.hasNext() && readsCounter<RECORDS_PER_PAGE){
+                Iterator<String> iterator = Files.lines(Paths.get(HISTORY_PATH + File.separator + room)).skip(startRecord - 1).iterator();
+                while (iterator.hasNext() && readsCounter < RECORDS_PER_PAGE) {
                     readsCounter++;
                     history.add(iterator.next());
                 }
@@ -79,7 +73,7 @@ public class HistoryManager {
         }
     }
 
-    public ArrayList<String> getHistoryFileNames() {
+    public ArrayList<String> getHistoryFileNames() { //TODO file validation
         ArrayList<String> list;
         File dir = new File(HISTORY_PATH);
         if (!dir.exists()) {
@@ -89,9 +83,9 @@ public class HistoryManager {
         return list;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         HistoryManager hm = new HistoryManager();
-        hm.getRoomHistory("MainRoom",2);
+        hm.getRoomHistory("MainRoom", 2);
     }
 }
 
