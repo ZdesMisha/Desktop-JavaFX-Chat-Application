@@ -1,6 +1,6 @@
 package practice.chat.history;
 
-import practice.chat.protocol.shared.message.MessageImplementation;
+import practice.chat.protocol.shared.message.Message;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -17,13 +17,13 @@ public class HistoryManager { //TODO does it should provide new instance for eac
     private final String HOME_DIR = System.getProperty("user.home");
     private final String HISTORY_DIR_NAME = "ChatHistory";
     private final String HISTORY_PATH = HOME_DIR + File.separator + HISTORY_DIR_NAME;
-    private final int RECORDS_PER_PAGE = 5;
+    private final int RECORDS_PER_PAGE = 20;
 
     public static HistoryManager getInstance() {
         return new HistoryManager();
     }
 
-    public void writeHistoryToFile(ArrayList<MessageImplementation> history, String room) { //TODO may be it would be better to implement using NIO?
+    public void writeHistoryToFile(ArrayList<Message> history, String room) { //TODO may be it would be better to implement using NIO?
         File dir = new File(HISTORY_PATH);
         File roomFile = new File(HISTORY_PATH + File.separator + room);
         BufferedWriter output = null;
@@ -35,8 +35,8 @@ public class HistoryManager { //TODO does it should provide new instance for eac
                 roomFile.createNewFile();
             }
             output = new BufferedWriter(new FileWriter(roomFile, true));
-            for (MessageImplementation message : history) {
-                output.write(message.getMessage() + "\n");
+            for (Message message : history) {
+                output.write(message + "\n");
             }
 
         } catch (IOException ex) {
@@ -81,11 +81,6 @@ public class HistoryManager { //TODO does it should provide new instance for eac
         }
         list = new ArrayList<>(Arrays.asList(dir.list()));
         return list;
-    }
-
-    public static void main(String[] args) {
-        HistoryManager hm = new HistoryManager();
-        hm.getRoomHistory("MainRoom", 2);
     }
 }
 

@@ -3,12 +3,12 @@ package practice.chat.background;
 import javafx.application.Platform;
 import practice.chat.controller.ChatController;
 import practice.chat.protocol.shared.message.*;
-import practice.chat.protocol.shared.message.ChangeRoom;
-import practice.chat.protocol.shared.message.CreateNewRoom;
-import practice.chat.protocol.shared.message.Login;
-import practice.chat.protocol.shared.message.MessageImplementation;
-import practice.chat.protocol.shared.message.OnlineUserList;
-import practice.chat.protocol.shared.message.RoomList;
+import practice.chat.protocol.shared.message.common.CreateNewRoom;
+import practice.chat.protocol.shared.message.info.RoomRequest;
+import practice.chat.protocol.shared.message.common.Login;
+import practice.chat.protocol.shared.message.common.TextMessage;
+import practice.chat.protocol.shared.message.info.OnlineUserList;
+import practice.chat.protocol.shared.message.info.RoomList;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -19,17 +19,21 @@ public class Client { //TODO consider if this class is really matters
 
     private ServerConnection serverConnection;
     private String login;
+    private String ip;
+    private int port;
     private String room = "MainRoom";
     private ChatController chatController;
 
 
-    public Client(String login, ChatController chatController) {
+    public Client(String login,String ip,int port, ChatController chatController) {
         this.login = login;
+        this.ip=ip;
+        this.port=port;
         this.chatController = chatController;
     }
 
     public void start() throws Exception {
-        serverConnection = new ServerConnection();
+        serverConnection = new ServerConnection(ip,port);
         serverConnection.establishConnection();
         serverConnection.start();
     }
@@ -50,52 +54,36 @@ public class Client { //TODO consider if this class is really matters
         }
     }
 
-    public void sendMessage(Message message) { //TODO implement universal message sender
-    }
-
-    public void sendTextMessage(TextMessage textMessage) throws IOException {
-        serverConnection.output.writeObject(textMessage);
-    }
-
-    public void sendLoginMessage() throws IOException {
-        serverConnection.output.writeObject(new Login(login));
-    }
-
-    public void sendCreateRoomMessage() throws IOException {
-        serverConnection.output.writeObject(new CreateNewRoom());
-    }
-
-    public void sendChangeRoomMessage(String room) throws IOException {
-        serverConnection.output.writeObject(new ChangeRoom(login, room));
-    }
-
-    public void sendRoomRequest() throws IOException {
-        serverConnection.output.writeObject(new RoomRequest());
+    public void sendMessage(Message message) throws IOException {
+        serverConnection.output.writeObject(message);
     }
 
     private class ServerConnection extends Thread {
 
-        private static final String IP = "127.0.0.1";
-        private static final int PORT = 1234;
-
+        private String ip;
+        private int port;
         private Socket socket;
         private InetAddress address;
         private Message message;
         private ObjectOutputStream output;
         private ObjectInputStream input;
 
+        public ServerConnection(String ip,int port){
+            this.ip=ip;
+            this.port=port;
+        }
+
         public void establishConnection() throws Exception {
-            address = InetAddress.getByName(IP);
-            socket = new Socket(address, PORT);
+            address = InetAddress.getByName(ip);
+            socket = new Socket(address, port);
+            output = new ObjectOutputStream(socket.getOutputStream());
+            input = new ObjectInputStream(socket.getInputStream());
         }
 
         public void run() {
 
             try {
-                output = new ObjectOutputStream(socket.getOutputStream());
-                input = new ObjectInputStream(socket.getInputStream());
-                sendLoginMessage(); //TODO if it will be work correct(there will be not other messages before login)
-                sendRoomRequest();
+                sendMessage(new Login(login));
                 while (true) {
                     message = (Message) input.readObject();
                     System.out.println(message);
@@ -111,6 +99,7 @@ public class Client { //TODO consider if this class is really matters
         }
 
         public void processMessage(Message message) {
+
             if (message instanceof OnlineUserList) {
 
                 chatController.updateUserList(((OnlineUserList) message).getUserList());
@@ -120,10 +109,13 @@ public class Client { //TODO consider if this class is really matters
                 chatController.updateRoomList(((RoomList) message).getRoomList());
 
             } else if (message instanceof RoomRequest) {
+
                 room = ((RoomRequest) message).getRoomName();
                 chatController.updateRoomNameLabel(room);
+
             } else {
-                chatController.displayMessage((MessageImplementation) message);
+
+                chatController.displayMessage((TextMessage) message);
 
             }
         }

@@ -36,9 +36,9 @@ public class HistoryWindowController {
 
     @FXML
     public void initialize() {
-        roomName.setText("MainRoom"); //TODO check if room name is empty( add on ServerController side)
+        roomName.setText("MainRoom"); //TODO check if room name is empty( add on ServerController side) and HOW TO MAKE IT WORK PROPER!!???
         previousButton.setDisable(true);
-        displayHistory();
+        showHistory();
     }
 
     public void handlePreviousButton() {
@@ -47,16 +47,16 @@ public class HistoryWindowController {
         } else {
             page--;
         }
-        displayHistory();
+        showHistory();
     }
 
     public void handleNextButton() {
         previousButton.setDisable(false);
         page++;
-        displayHistory();
+        showHistory();
     }
 
-    public void displayHistory() {
+    public void showHistory() {
         textArea.clear();
         for (String line : historyManager.getRoomHistory(roomName.getText(), page)) {
             textArea.appendText(line + "\n");

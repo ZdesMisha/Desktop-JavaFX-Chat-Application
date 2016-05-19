@@ -2,10 +2,15 @@ package practice.chat.server;
 
 
 import practice.chat.history.HistoryManager;
-import practice.chat.protocol.shared.message.*;
+import practice.chat.protocol.shared.message.Message;
+import practice.chat.protocol.shared.message.info.OnlineUserList;
+import practice.chat.protocol.shared.message.info.RoomList;
+import practice.chat.protocol.shared.message.info.RoomRequest;
+import practice.chat.protocol.shared.message.common.Login;
+import practice.chat.protocol.shared.message.common.Logout;
+import practice.chat.protocol.shared.message.common.TextMessage;
 
-import java.net.Socket;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Created by misha on 04.05.16.
@@ -18,7 +23,8 @@ public class Room {
     private String name;
     private HistoryManager historyManager = HistoryManager.getInstance();
 
-    private final ArrayList<MessageImplementation> recentHistory = new ArrayList<>();
+    private final ArrayList<Message> recentHistory = new ArrayList<>();
+    private final Queue<Message> recentMessages = new LinkedList<>();
     private final ArrayList<Client> users = new ArrayList<>();
 
 
@@ -57,40 +63,35 @@ public class Room {
         return isMainRoom;
     }
 
-    public void addUserToMainRoom(Socket socket) {
-        Client client = new Client(socket, this);
-        client.onInit(() -> sendRecentMessages(client));
-        client.start();
+
+    public void addUser(Client client) {
+        sendRecentMessages(client);
+        client.sendMessage(new RoomRequest(this.getName()));
+        client.sendMessage(new RoomList(chat.prepareRoomList()));
         synchronized (users) {
             users.add(client);
         }
-        synchronized (chat.rooms) {
-            client.setRoom(chat.rooms.get("MainRoom"));
-        }
+        client.setRoom(this);
+        TextMessage loginMessage = new Login(client.getLogin());
+        loginMessage.setDate(new Date());
+        saveMessageInQueue(loginMessage);
+        broadcastRoomMessage(loginMessage);
+        broadcastRoomMessage(new OnlineUserList(prepareUserList()));
     }
 
-    public synchronized void addUser(Client client) {
-        users.add(client);
-        client.setRoom(this);
-        Message loginMessage = new TextMessage(client.getLogin() + " has joined the chat");
-        broadcastRoomMessage(loginMessage);
-        saveMessageInQueue(loginMessage);
-        broadcastRoomMessage(new RoomList(chat.prepareRoomList()));
-        broadcastRoomMessage(new OnlineUserList(prepareUserList()));
-        client.sendMessage(new RoomRequest(this.getName())); //TODO may there is a better way to inform client about his current room?
-    }
 
     public void removeUser(Client client) {
         synchronized (users) {
             users.remove(client);
         }
-        Message logoutMessage = new Logout(client.getLogin());
-        broadcastRoomMessage(logoutMessage);
+        TextMessage logoutMessage = new Logout(client.getLogin());
+        logoutMessage.setDate(new Date());
         saveMessageInQueue(logoutMessage);
+        broadcastRoomMessage(logoutMessage);
         broadcastRoomMessage(new OnlineUserList(prepareUserList()));
     }
 
-    public synchronized ArrayList<String> prepareUserList() {
+    private synchronized ArrayList<String> prepareUserList() {
         ArrayList<String> userList = new ArrayList<>();
         for (Client user : users) {
             userList.add(user.getLogin());
@@ -99,27 +100,27 @@ public class Room {
     }
 
     public void saveMessageInQueue(Message message) {
-        synchronized (recentHistory) {
-            if (recentHistory.size() > 20) {
-                historyManager.writeHistoryToFile(recentHistory, this.getName()); //TODO may here is a better solution
-                ArrayList<MessageImplementation> temp = (ArrayList<MessageImplementation>)recentHistory.subList(recentHistory.size()-10,recentHistory.size()-1);
-                recentHistory.clear();
-                recentHistory.addAll(temp);
+        synchronized (recentMessages) {
+            recentMessages.offer(message);
+            if (recentMessages.size() >= 10) {
+                recentHistory.add(recentMessages.poll());
+            } else {
+                recentHistory.add(recentMessages.peek());
             }
-            recentHistory.add((MessageImplementation) message);
+            if (recentHistory.size() >= 20) {
+                saveHistory(recentHistory);
+            }
         }
     }
 
-    public synchronized void sendRecentMessages(Client client) {
-        int size = recentHistory.size(); //TODO may here is a better solution
-        if (size > 10) {
-            for (int i = 1; i < 10; i++) {
-                client.sendMessage(recentHistory.get(size - i));
-            }
-        } else {
-            for (Message message : recentHistory) {
-                client.sendMessage(message);
-            }
+    private void saveHistory(ArrayList<Message> history) {
+        historyManager.writeHistoryToFile(recentHistory, this.getName());
+        recentHistory.clear();
+    }
+
+    private void sendRecentMessages(Client client) {
+        synchronized (recentMessages) {
+            recentMessages.forEach(client::sendMessage);
         }
     }
 
@@ -129,5 +130,21 @@ public class Room {
 
     public void closeClientConnections() {
         users.forEach(Client::closeConnection);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Room room = (Room) o;
+
+        return name != null ? name.equals(room.name) : room.name == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 }

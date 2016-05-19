@@ -31,7 +31,7 @@ public class Server extends Thread {
                 serverController.displayMessage("Waiting for a connection...");
                 Socket clientSocket = serverSocket.accept();
                 serverController.displayMessage("New client connected, socket: " + clientSocket);
-                chat.addToMainRoom(clientSocket);
+                chat.addUserToChat(clientSocket);
             }
         } catch (Exception ex) {
             System.out.println("Server failure"); //TODO  logger

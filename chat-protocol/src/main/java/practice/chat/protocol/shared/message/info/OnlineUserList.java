@@ -1,5 +1,7 @@
-package practice.chat.protocol.shared.message;
+package practice.chat.protocol.shared.message.info;
 
+
+import practice.chat.protocol.shared.message.Message;
 
 import java.util.ArrayList;
 

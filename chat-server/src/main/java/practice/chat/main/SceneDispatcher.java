@@ -54,6 +54,7 @@ public class SceneDispatcher {
             Parent root = loader.load(stream);
             historyWindowController = loader.getController();
             historyWindowController.setSceneDispatcher(this);
+            historyWindowController.showHistory();
             Stage window = new Stage();
             window.setScene(new Scene(root));
             window.show();
@@ -83,7 +84,7 @@ public class SceneDispatcher {
         return serverController;
     }
 
-    public String getRoomName() {
-        return serverController.roomChoice.getValue();
+    public void setRoomName(String roomName) {
+        historyWindowController.roomName.setText(roomName);
     }
 }

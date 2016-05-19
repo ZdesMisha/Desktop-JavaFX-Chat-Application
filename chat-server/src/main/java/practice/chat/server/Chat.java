@@ -1,13 +1,12 @@
 package practice.chat.server;
 
 import practice.chat.protocol.shared.message.Message;
-import practice.chat.protocol.shared.message.RoomList;
+import practice.chat.protocol.shared.message.common.CreateNewRoom;
+import practice.chat.protocol.shared.message.common.TextMessage;
+import practice.chat.protocol.shared.message.info.RoomList;
 
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by misha on 06.05.16.
@@ -29,17 +28,25 @@ public class Chat {
         rooms.put("MainRoom", new Room("MainRoom", this));
     }
 
-    public void addToMainRoom(Socket socket) {
-        synchronized (rooms) {
-            rooms.get("MainRoom").addUserToMainRoom(socket);
+
+    public void addToMainRoom(Client client) {
+        synchronized (rooms) { // TODO implement user name validation
+            rooms.get("MainRoom").addUser(client);
         }
+    }
+
+    public void addUserToChat(Socket socket) {
+        Client client = new Client(socket);
+//        client.onInit(() -> {
+//            sendRecentMessages(client);
+//            client.sendMessage(new RoomRequest("MainRoom"));
+//        });
+        client.start();
     }
 
     public void stop() {
         synchronized (rooms) {
-            for (Room room : rooms.values()) {
-                room.closeClientConnections();
-            }
+            rooms.values().forEach(Room::closeClientConnections);
         }
     }
 
@@ -48,27 +55,39 @@ public class Chat {
         synchronized (rooms) {
             rooms.put(newRoom.getName(), newRoom);
         }
+        broadcastChatMessage(new RoomList(prepareRoomList()));
+        CreateNewRoom newRoomMessage = new CreateNewRoom(client.getLogin());
+        newRoomMessage.setRoomName(newRoom.getName()); //TODO get rid of this shit
+        newRoomMessage.setDate(new Date());
+        for(Room room : rooms.values()){
+            room.saveMessageInQueue(newRoomMessage);
+        }
+        broadcastChatMessage(new CreateNewRoom(client.getLogin()));
         changeRoom(client, newRoom);
     }
 
-    public void removeRoom(Room room) {
-        String roomName = room.getName();
+    private void removeRoom(Room room) {
         synchronized (rooms) {
-            if (rooms.get(roomName).isMainRoom()) {
+            if (room.isMainRoom()) {
                 return;
+            } else {
+                rooms.remove(room.getName());
+                broadcastChatMessage(new RoomList(prepareRoomList()));
             }
-            rooms.remove(roomName);
         }
     }
 
     public void changeRoom(Client client, Room newRoom) {
         Room oldRoom = client.getRoom();
+        if (oldRoom.equals(newRoom)) {
+            System.out.println("Equals!");
+            return;
+        }
         oldRoom.removeUser(client);
         newRoom.addUser(client);
         synchronized (rooms) {
-            if (rooms.get(oldRoom.getName()).isEmptyRoom()) {
+            if (oldRoom.isEmptyRoom()) {
                 removeRoom(oldRoom);
-                broadcastChatMessage(new RoomList(prepareRoomList()));
             }
         }
     }
@@ -83,8 +102,7 @@ public class Chat {
 
     public ArrayList<String> prepareRoomList() {
         synchronized (rooms) {
-            Set<String> roomSet = rooms.keySet();//TODO do something with it
-            return new ArrayList<>(roomSet);
+            return new ArrayList<>(rooms.keySet());
         }
     }
 }

@@ -1,4 +1,6 @@
-package practice.chat.protocol.shared.message;
+package practice.chat.protocol.shared.message.info;
+
+import practice.chat.protocol.shared.message.Message;
 
 /**
  * Created by misha on 16.05.16.
@@ -6,11 +8,11 @@ package practice.chat.protocol.shared.message;
 public class RoomRequest implements Message {
     String roomName;
 
-    public  RoomRequest(){
+    public RoomRequest() {
     }
 
-    public RoomRequest(String roomName){
-        this.roomName=roomName;
+    public RoomRequest(String roomName) {
+        this.roomName = roomName;
     }
 
     public String getRoomName() {

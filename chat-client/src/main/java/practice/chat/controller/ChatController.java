@@ -1,23 +1,21 @@
 package practice.chat.controller;
 
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import practice.chat.main.SceneDispatcher;
-import practice.chat.protocol.shared.message.MessageImplementation;
+import practice.chat.protocol.shared.message.common.ChangeRoom;
+import practice.chat.protocol.shared.message.common.CreateNewRoom;
+import practice.chat.protocol.shared.message.common.TextMessage;
 import practice.chat.main.MainApp;
-import practice.chat.protocol.shared.message.TextMessage;
+import practice.chat.protocol.shared.message.common.Text;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by misha on 06.05.16.
@@ -41,10 +39,8 @@ public class ChatController {
 
     private SceneDispatcher sceneDispatcher;
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
-
     @FXML
-    public void initialize() { ///TODO may be it would be better to move somethin else to initializer?
+    public void initialize() { ///TODO may be it would be better to move something else to initializer?
         textField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
                 handleSendButton();
@@ -60,7 +56,7 @@ public class ChatController {
         userList.clear();
         chatDisplay.clear();
         try {
-            MainApp.client.sendCreateRoomMessage();
+            MainApp.client.sendMessage(new CreateNewRoom(login.getText()));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -70,7 +66,7 @@ public class ChatController {
         userList.clear();
         chatDisplay.clear();
         try {
-            MainApp.client.sendChangeRoomMessage(roomChoice.getValue());
+            MainApp.client.sendMessage(new ChangeRoom(login.getText(),roomChoice.getValue()));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -85,7 +81,7 @@ public class ChatController {
         String message = textField.getText();
         if (isValidMessage(message)) {
             try {
-                MainApp.client.sendTextMessage(new TextMessage(login.getText(), message));
+                MainApp.client.sendMessage(new Text(login.getText(), message));
                 textField.clear();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -93,12 +89,11 @@ public class ChatController {
         }
     }
 
-    public void displayMessage(MessageImplementation userMessage) {
-        String date = sdf.format(new Date());
-        chatDisplay.appendText("[" + date + "]\n" + userMessage.getMessage() + "\n");
+    public void displayMessage(TextMessage userMessage) {
+        chatDisplay.appendText(userMessage + "\n");
     }
 
-    public void handleBrokenConnection() {
+    public void handleBrokenConnection() { //TODO add notification about connection failure;
         sceneDispatcher.switchToLogin();
     }
 
@@ -118,13 +113,14 @@ public class ChatController {
             for (String room : rooms) {
                 roomChoice.getItems().add(room);
             }
-            roomChoice.setValue("MainRoom");
+            roomChoice.setValue(room.getText());
         });
     }
 
     public void updateRoomNameLabel(String roomName) {
         Platform.runLater(() -> {
             room.setText(roomName);
+            roomChoice.setValue(roomName); //TODO make sure it will always work correct
         });
     }
 

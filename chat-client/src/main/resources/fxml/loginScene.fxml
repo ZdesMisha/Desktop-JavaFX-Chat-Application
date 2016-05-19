@@ -7,22 +7,26 @@
 
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="450.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.LoginController">
   <children>
-    <Button fx:id="joinInButton" layoutX="181.0" layoutY="210.0" mnemonicParsing="false" onAction="#handleJoinInButton" prefWidth="83.0" text="Join in!" />
-    <TextField fx:id="loginField" layoutX="70.0" layoutY="165.0" prefHeight="21.0" prefWidth="306.0" promptText="&quot;from 2 to 10 letters or digits&quot;" text="" />
-    <Label layoutX="151.0" layoutY="95.0" text="Welcome to Chat">
+    <Button fx:id="joinInButton" layoutX="184.0" layoutY="248.0" mnemonicParsing="false" onAction="#handleJoinInButton" prefWidth="83.0" text="Join in!" />
+    <TextField fx:id="loginField" layoutX="163.0" layoutY="119.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="" />
+    <Label layoutX="152.0" layoutY="48.0" text="Welcome to Chat">
       <font>
         <Font name="System Bold" size="15.0" />
       </font>
     </Label>
-    <Label layoutX="70.0" layoutY="149.0" text="Your login:">
+    <Label layoutX="163.0" layoutY="103.0" text="Login:">
       <font>
-        <Font name="System Bold" size="13.0" />
+        <Font name="System Bold" size="13.0" fx:id="x1" />
       </font>
     </Label>
-    <Label fx:id="message" layoutX="70.0" layoutY="246.0" prefWidth="306.0" text="" textAlignment="CENTER" textFill="#ff3333">
+    <Label fx:id="errorMessage" layoutX="70.0" layoutY="246.0" prefWidth="306.0" text="" textAlignment="CENTER" textFill="#ff3333">
       <font>
         <Font name="System Bold Italic" size="13.0" />
       </font>
     </Label>
+    <Label font="$x1" layoutX="163.0" layoutY="191.0" text="Port:" />
+    <Label font="$x1" layoutX="163.0" layoutY="149.0" text="IP address:" />
+    <TextField fx:id="ipAddressField" id="ipAddressField" layoutX="161.0" layoutY="165.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="127.0.0.1" />
+    <TextField fx:id="portField" id="portField" layoutX="163.0" layoutY="207.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="1234" />
   </children>
 </AnchorPane>

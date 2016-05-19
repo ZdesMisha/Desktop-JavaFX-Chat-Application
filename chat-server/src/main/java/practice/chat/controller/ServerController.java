@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
@@ -68,14 +69,21 @@ public class ServerController {
     }
 
     public void handleShowHistoryButton() {
+        if (roomChoice.getValue()!=null){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("You have to chose room!");
+            alert.show();
+        }
         sceneDispatcher.openHistoryWindow();
+        //sceneDispatcher.setRoomName(roomChoice.getValue());
+
     }
 
     public void displayMessage(String message) {
         serverLog.appendText(message + "\n");
     }
 
-    public void updateRoomList(ArrayList<String> rooms) { ///TODO fix this shit
+    private void updateRoomList(ArrayList<String> rooms) { ///TODO fix this shit
         Platform.runLater(() -> {
             roomChoice.getItems().clear();
             for (String room : rooms) {
