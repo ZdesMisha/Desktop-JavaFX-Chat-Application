@@ -4,7 +4,6 @@ package practice.chat.backend;
 import practice.chat.history.HistoryManager;
 import practice.chat.protocol.shared.message.Message;
 import practice.chat.protocol.shared.message.TextMessage;
-import practice.chat.protocol.shared.message.request.Logout;
 import practice.chat.protocol.shared.message.response.info.CurrentRoom;
 import practice.chat.protocol.shared.message.response.info.RoomList;
 import practice.chat.protocol.shared.message.response.info.UserList;
@@ -24,7 +23,7 @@ public class Room {
     private String name;
     private HistoryManager historyManager = HistoryManager.getInstance();
 
-    private final ArrayList<Message> recentHistory = new ArrayList<>();
+    private final ArrayList<Message> history = new ArrayList<>();
     private final Queue<Message> recentMessages = new LinkedList<>();
     private final ArrayList<Client> users = new ArrayList<>();
 
@@ -46,7 +45,7 @@ public class Room {
         return name + " with users: " + users;
     }
 
-    public void broadcastRoomMessage(Message message) {
+    public void broadcastMessage(Message message) {
         synchronized (users) {
             for (Client client : users) {
                 client.sendMessage(message);
@@ -54,7 +53,7 @@ public class Room {
         }
     }
 
-    public synchronized boolean isEmptyRoom() {
+    public boolean isEmpty() {
         synchronized (users) {
             return users.isEmpty();
         }
@@ -75,8 +74,8 @@ public class Room {
         client.setRoom(this);
         TextMessage loginMessage = new NewUser(client.getLogin(),new Date());
         saveMessageInQueue(loginMessage);
-        broadcastRoomMessage(loginMessage);
-        broadcastRoomMessage(new UserList(prepareUserList()));
+        broadcastMessage(loginMessage);
+        broadcastMessage(new UserList(prepareUserList()));
     }
 
 
@@ -86,35 +85,36 @@ public class Room {
         }
         TextMessage logoutMessage = new UserLeft(client.getLogin(),new Date());
         saveMessageInQueue(logoutMessage);
-        broadcastRoomMessage(logoutMessage);
-        broadcastRoomMessage(new UserList(prepareUserList()));
+        broadcastMessage(logoutMessage);
+        broadcastMessage(new UserList(prepareUserList()));
     }
 
-    private synchronized ArrayList<String> prepareUserList() {
+    private ArrayList<String> prepareUserList() {
         ArrayList<String> userList = new ArrayList<>();
-        for (Client user : users) {
-            userList.add(user.getLogin());
+        synchronized (users) {
+            for (Client user : users) {
+                userList.add(user.getLogin());
+            }
         }
         return userList;
     }
 
-    public void saveMessageInQueue(Message message) {
+    public void saveMessageInQueue(TextMessage message) {
         synchronized (recentMessages) {
             recentMessages.offer(message);
             if (recentMessages.size() >= 10) {
-                recentHistory.add(recentMessages.poll());
-            } else {
-                recentHistory.add(recentMessages.peek());
+                history.add(recentMessages.poll());
             }
-            if (recentHistory.size() >= 20) {
-                saveHistory(recentHistory);
+            if (history.size() >= 20) {
+                saveHistory();
             }
         }
     }
 
-    private void saveHistory(ArrayList<Message> history) {
-        historyManager.writeHistoryToFile(recentHistory, this.getName());
-        recentHistory.clear();
+    public synchronized void saveHistory() {
+        history.addAll(recentMessages);
+        historyManager.writeHistory(history, this.getName());
+        this.history.clear();
     }
 
     private void sendRecentMessages(Client client) {
@@ -128,6 +128,8 @@ public class Room {
     }
 
     public void closeClientConnections() {
+
+        saveHistory();
         users.forEach(Client::closeConnection);
     }
 

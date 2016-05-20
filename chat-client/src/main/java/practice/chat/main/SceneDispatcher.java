@@ -78,7 +78,7 @@ public class SceneDispatcher {
     }
 
     public void injectLoginLabel(String login) {
-        chatController.login.setText(login + ":");
+        chatController.login.setText(login);
     }
 
     public LoginController getLoginController() {

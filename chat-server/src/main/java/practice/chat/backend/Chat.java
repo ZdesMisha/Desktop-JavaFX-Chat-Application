@@ -76,6 +76,7 @@ public class Chat {
                     r.saveMessageInQueue(roomClosedMessage);
                 }
                 broadcastChatMessage(new RoomList(prepareRoomList()));
+                room.saveHistory();
             }
         }
     }
@@ -83,13 +84,12 @@ public class Chat {
     public void changeRoom(Client client, Room newRoom) {
         Room oldRoom = client.getRoom();
         if (oldRoom.equals(newRoom)) {
-            System.out.println("Equals!");
             return;
         }
         oldRoom.removeUser(client);
         newRoom.addUser(client);
         synchronized (rooms) {
-            if (oldRoom.isEmptyRoom()) {
+            if (oldRoom.isEmpty()) {
                 removeRoom(oldRoom);
             }
         }
@@ -98,7 +98,7 @@ public class Chat {
     public void broadcastChatMessage(Message message) {
         synchronized (rooms) {
             for (Room room : rooms.values()) {
-                room.broadcastRoomMessage(message);
+                room.broadcastMessage(message);
             }
         }
     }

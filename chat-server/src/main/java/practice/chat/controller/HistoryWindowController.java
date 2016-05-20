@@ -58,7 +58,7 @@ public class HistoryWindowController {
 
     public void showHistory() {
         textArea.clear();
-        for (String line : historyManager.getRoomHistory(roomName.getText(), page)) {
+        for (String line : historyManager.readHistory(roomName.getText(), page)) {
             textArea.appendText(line + "\n");
         }
     }

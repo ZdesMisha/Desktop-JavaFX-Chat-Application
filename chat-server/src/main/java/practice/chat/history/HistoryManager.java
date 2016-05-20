@@ -23,7 +23,7 @@ public class HistoryManager { //TODO does it should provide new instance for eac
         return new HistoryManager();
     }
 
-    public void writeHistoryToFile(ArrayList<Message> history, String room) { //TODO may be it would be better to implement using NIO?
+    public void writeHistory(ArrayList<Message> history, String room) { //TODO may be it would be better to implement using NIO?
         File dir = new File(HISTORY_PATH);
         File roomFile = new File(HISTORY_PATH + File.separator + room);
         BufferedWriter output = null;
@@ -38,7 +38,6 @@ public class HistoryManager { //TODO does it should provide new instance for eac
             for (Message message : history) {
                 output.write(message + "\n");
             }
-
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -50,10 +49,9 @@ public class HistoryManager { //TODO does it should provide new instance for eac
                 ex.printStackTrace();
             }
         }
-        //TODO need to update room list in Server UI
     }
 
-    public ArrayList<String> getRoomHistory(String room, int page) {
+    public ArrayList<String> readHistory(String room, int page) {
         File file = new File(HISTORY_PATH + File.separator + room);
         long startRecord = RECORDS_PER_PAGE * (page - 1) + 1;
         int readsCounter = 0;
@@ -65,6 +63,8 @@ public class HistoryManager { //TODO does it should provide new instance for eac
                     readsCounter++;
                     history.add(iterator.next());
                 }
+            } else {
+                history.add("File not found");
             }
             return history;
         } catch (IOException ex) {
