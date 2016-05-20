@@ -3,11 +3,10 @@ package practice.chat.backend;
 import javafx.application.Platform;
 import practice.chat.controller.ChatController;
 import practice.chat.protocol.shared.message.*;
-import practice.chat.protocol.shared.message.info.RoomRequest;
-import practice.chat.protocol.shared.message.common.Login;
-import practice.chat.protocol.shared.message.common.TextMessage;
-import practice.chat.protocol.shared.message.info.OnlineUserList;
-import practice.chat.protocol.shared.message.info.RoomList;
+import practice.chat.protocol.shared.message.request.Login;
+import practice.chat.protocol.shared.message.response.info.CurrentRoom;
+import practice.chat.protocol.shared.message.response.info.RoomList;
+import practice.chat.protocol.shared.message.response.info.UserList;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -33,12 +32,7 @@ public class Client extends Thread {
         this.chatController = chatController;
     }
 
-    public void start() {
-        establishConnection();
-        start();
-    }
-
-    public void close() {
+    public void close() { //TODO send logout message
         try {
             if (output != null) {
                 output.close();
@@ -54,7 +48,7 @@ public class Client extends Thread {
         }
     }
 
-    private void establishConnection() {
+    public void establishConnection() {
         InetAddress address;
         try {
             address = InetAddress.getByName(ip);
@@ -65,7 +59,7 @@ public class Client extends Thread {
             System.out.println("Can not establish connection to backend");
             ex.printStackTrace();
         } finally {
-            Platform.runLater(() -> chatController.handleBrokenConnection());
+            //Platform.runLater(() -> chatController.handleBrokenConnection());
         }
     }
 
@@ -94,18 +88,18 @@ public class Client extends Thread {
 
     private void processMessage(Message message) {
 
-        if (message instanceof OnlineUserList) {
+        if (message instanceof UserList) {
 
-            chatController.updateUserList(((OnlineUserList) message).getUserList());
+            chatController.updateUserList(((UserList) message).getUserList());
 
         } else if (message instanceof RoomList) {
 
             chatController.updateRoomList(((RoomList) message).getRoomList());
 
-        } else if (message instanceof RoomRequest) {
+        } else if (message instanceof CurrentRoom) {
 
             //room = ((RoomRequest) message).getRoomName();
-            String room = ((RoomRequest) message).getRoomName(); //TODO if String room really unnecessary?
+            String room = ((CurrentRoom) message).getRoomName(); //TODO if String room really unnecessary?
             chatController.updateRoomNameLabel(room);
 
         } else {

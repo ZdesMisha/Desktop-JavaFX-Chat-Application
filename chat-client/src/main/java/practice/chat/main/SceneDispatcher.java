@@ -70,8 +70,11 @@ public class SceneDispatcher {
     }
 
     private void closeApp() {
-        MainApp.client.close();
         Platform.exit();
+        if(MainApp.client!=null) {
+            MainApp.client.close();
+        }
+
     }
 
     public void injectLoginLabel(String login) {

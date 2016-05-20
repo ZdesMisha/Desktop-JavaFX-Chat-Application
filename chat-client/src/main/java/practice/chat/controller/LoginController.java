@@ -71,6 +71,7 @@ public class LoginController {
                 sceneDispatcher.switchToChat(); //TODO finish it
                 sceneDispatcher.injectLoginLabel(login);
                 MainApp.client = new Client(login, ip, Integer.parseInt(port), sceneDispatcher.getChatController());
+                MainApp.client.establishConnection();
                 MainApp.client.start();
             } catch (Exception ex) {
                 errorMessage.setText("Can not establish connection with backend");

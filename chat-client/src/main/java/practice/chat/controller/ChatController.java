@@ -5,11 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import practice.chat.main.SceneDispatcher;
-import practice.chat.protocol.shared.message.common.ChangeRoom;
-import practice.chat.protocol.shared.message.common.CreateNewRoom;
-import practice.chat.protocol.shared.message.common.TextMessage;
 import practice.chat.main.MainApp;
+import practice.chat.protocol.shared.message.TextMessage;
 import practice.chat.protocol.shared.message.common.Text;
+import practice.chat.protocol.shared.message.request.ChangeRoom;
+import practice.chat.protocol.shared.message.request.CreateRoom;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class ChatController {
         userList.clear();
         chatDisplay.clear();
         try {
-            MainApp.client.sendMessage(new CreateNewRoom(login.getText()));
+            MainApp.client.sendMessage(new CreateRoom(login.getText()));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -67,7 +67,7 @@ public class ChatController {
         userList.clear();
         chatDisplay.clear();
         try {
-            MainApp.client.sendMessage(new ChangeRoom(login.getText(), roomChoice.getValue()));
+            MainApp.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -82,7 +82,7 @@ public class ChatController {
         String message = textField.getText();
         if (isValidMessage(message)) {
             try {
-                MainApp.client.sendMessage(new Text(login.getText(), message));
+                MainApp.client.sendMessage(new Text(login.getText(),message));
                 textField.clear();
             } catch (IOException ex) {
                 ex.printStackTrace();

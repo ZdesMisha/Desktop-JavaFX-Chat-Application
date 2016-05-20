@@ -3,12 +3,13 @@ package practice.chat.backend;
 
 import practice.chat.history.HistoryManager;
 import practice.chat.protocol.shared.message.Message;
-import practice.chat.protocol.shared.message.info.OnlineUserList;
-import practice.chat.protocol.shared.message.info.RoomList;
-import practice.chat.protocol.shared.message.info.RoomRequest;
-import practice.chat.protocol.shared.message.common.Login;
-import practice.chat.protocol.shared.message.common.Logout;
-import practice.chat.protocol.shared.message.common.TextMessage;
+import practice.chat.protocol.shared.message.TextMessage;
+import practice.chat.protocol.shared.message.request.Logout;
+import practice.chat.protocol.shared.message.response.info.CurrentRoom;
+import practice.chat.protocol.shared.message.response.info.RoomList;
+import practice.chat.protocol.shared.message.response.info.UserList;
+import practice.chat.protocol.shared.message.response.text.NewUser;
+import practice.chat.protocol.shared.message.response.text.UserLeft;
 
 import java.util.*;
 
@@ -66,17 +67,16 @@ public class Room {
 
     public void addUser(Client client) {
         sendRecentMessages(client);
-        client.sendMessage(new RoomRequest(this.getName()));
+        client.sendMessage(new CurrentRoom(this.getName()));
         client.sendMessage(new RoomList(chat.prepareRoomList()));
         synchronized (users) {
             users.add(client);
         }
         client.setRoom(this);
-        TextMessage loginMessage = new Login(client.getLogin());
-        loginMessage.setDate(new Date());
+        TextMessage loginMessage = new NewUser(client.getLogin(),new Date());
         saveMessageInQueue(loginMessage);
         broadcastRoomMessage(loginMessage);
-        broadcastRoomMessage(new OnlineUserList(prepareUserList()));
+        broadcastRoomMessage(new UserList(prepareUserList()));
     }
 
 
@@ -84,11 +84,10 @@ public class Room {
         synchronized (users) {
             users.remove(client);
         }
-        TextMessage logoutMessage = new Logout(client.getLogin());
-        logoutMessage.setDate(new Date());
+        TextMessage logoutMessage = new UserLeft(client.getLogin(),new Date());
         saveMessageInQueue(logoutMessage);
         broadcastRoomMessage(logoutMessage);
-        broadcastRoomMessage(new OnlineUserList(prepareUserList()));
+        broadcastRoomMessage(new UserList(prepareUserList()));
     }
 
     private synchronized ArrayList<String> prepareUserList() {

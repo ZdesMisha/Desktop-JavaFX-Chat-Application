@@ -1,8 +1,9 @@
 package practice.chat.backend;
 
 import practice.chat.protocol.shared.message.Message;
-import practice.chat.protocol.shared.message.common.CreateNewRoom;
-import practice.chat.protocol.shared.message.info.RoomList;
+import practice.chat.protocol.shared.message.response.info.RoomList;
+import practice.chat.protocol.shared.message.response.text.RoomClosed;
+import practice.chat.protocol.shared.message.response.text.RoomCreated;
 
 import java.net.Socket;
 import java.util.*;
@@ -55,13 +56,11 @@ public class Chat {
             rooms.put(newRoom.getName(), newRoom);
         }
         broadcastChatMessage(new RoomList(prepareRoomList()));
-        CreateNewRoom newRoomMessage = new CreateNewRoom(client.getLogin());
-        newRoomMessage.setRoomName(newRoom.getName()); //TODO get rid of this shit
-        newRoomMessage.setDate(new Date());
-        for(Room room : rooms.values()){
-            room.saveMessageInQueue(newRoomMessage);
-        }
+        RoomCreated newRoomMessage = new RoomCreated(client.getLogin(),newRoom.getName(),new Date());
         broadcastChatMessage(newRoomMessage);
+        for(Room r : rooms.values()){
+            r.saveMessageInQueue(newRoomMessage);
+        }
         changeRoom(client, newRoom);
     }
 
@@ -71,6 +70,11 @@ public class Chat {
                 return;
             } else {
                 rooms.remove(room.getName());
+                RoomClosed roomClosedMessage = new RoomClosed(room.getName(),new Date());
+                broadcastChatMessage(roomClosedMessage);
+                for(Room r : rooms.values()){
+                    r.saveMessageInQueue(roomClosedMessage);
+                }
                 broadcastChatMessage(new RoomList(prepareRoomList()));
             }
         }
