@@ -8,9 +8,6 @@ import practice.chat.protocol.shared.message.Message;
 public class RoomRequest implements Message {
     String roomName;
 
-    public RoomRequest() {
-    }
-
     public RoomRequest(String roomName) {
         this.roomName = roomName;
     }

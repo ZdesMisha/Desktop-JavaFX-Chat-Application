@@ -2,18 +2,14 @@ package practice.chat.controller;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import practice.chat.history.HistoryManager;
 import practice.chat.main.SceneDispatcher;
 import practice.chat.main.ServerApp;
-import practice.chat.server.Server;
+import practice.chat.backend.Server;
 
 import java.util.ArrayList;
 
@@ -43,7 +39,7 @@ public class ServerController {
 
 
     public void handleRunButton() {
-        displayMessage("Starting server...");
+        displayMessage("Starting backend...");
         ServerApp.server = new Server(sceneDispatcher.getServerController());
         ServerApp.server.start();
         updateRoomList(historyManager.getHistoryFileNames());
@@ -59,7 +55,7 @@ public class ServerController {
     public void handleShutdownButton() {
         // Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() { //TODO implement it somewhere...
         //    public void run() {
-        displayMessage("Shutdown server...");
+        displayMessage("Shutdown backend...");
         ServerApp.server.shutdown();
         displayMessage("Server is down");
         runButton.setDisable(false);

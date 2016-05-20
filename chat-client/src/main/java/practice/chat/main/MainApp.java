@@ -2,7 +2,7 @@ package practice.chat.main;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import practice.chat.background.Client;
+import practice.chat.backend.Client;
 
 
 /**

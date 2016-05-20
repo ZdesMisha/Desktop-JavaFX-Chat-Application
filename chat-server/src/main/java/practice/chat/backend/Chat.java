@@ -1,8 +1,7 @@
-package practice.chat.server;
+package practice.chat.backend;
 
 import practice.chat.protocol.shared.message.Message;
 import practice.chat.protocol.shared.message.common.CreateNewRoom;
-import practice.chat.protocol.shared.message.common.TextMessage;
 import practice.chat.protocol.shared.message.info.RoomList;
 
 import java.net.Socket;
@@ -62,7 +61,7 @@ public class Chat {
         for(Room room : rooms.values()){
             room.saveMessageInQueue(newRoomMessage);
         }
-        broadcastChatMessage(new CreateNewRoom(client.getLogin()));
+        broadcastChatMessage(newRoomMessage);
         changeRoom(client, newRoom);
     }
 

@@ -1,4 +1,4 @@
-package practice.chat.server;
+package practice.chat.backend;
 
 
 import practice.chat.history.HistoryManager;

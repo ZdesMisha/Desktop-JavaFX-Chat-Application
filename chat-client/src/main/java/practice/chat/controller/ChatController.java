@@ -2,10 +2,7 @@ package practice.chat.controller;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import practice.chat.main.SceneDispatcher;
 import practice.chat.protocol.shared.message.common.ChangeRoom;
@@ -37,10 +34,14 @@ public class ChatController {
 
     public ChoiceBox<String> roomChoice;
 
+    private TextFormatter<String> textLengthFormatter = new TextFormatter<>(c -> c
+            .getControlNewText().length() > 300 ? null : c);
+
     private SceneDispatcher sceneDispatcher;
 
     @FXML
     public void initialize() { ///TODO may be it would be better to move something else to initializer?
+        textField.setTextFormatter(textLengthFormatter);
         textField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
                 handleSendButton();
@@ -66,7 +67,7 @@ public class ChatController {
         userList.clear();
         chatDisplay.clear();
         try {
-            MainApp.client.sendMessage(new ChangeRoom(login.getText(),roomChoice.getValue()));
+            MainApp.client.sendMessage(new ChangeRoom(login.getText(), roomChoice.getValue()));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -125,7 +126,7 @@ public class ChatController {
     }
 
     private boolean isValidMessage(String message) {
-        return message.matches(".{1,30}");
+        return message.matches(".+");
     }
 
 
