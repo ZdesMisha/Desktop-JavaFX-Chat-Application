@@ -6,9 +6,17 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
+<?import javafx.geometry.Insets?>
 <AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.ChatController">
   <children>
-    <TextArea fx:id="chatDisplay" editable="false" layoutX="28.0" layoutY="42.0" prefHeight="366.0" prefWidth="494.0" wrapText="true" />
+    <ScrollPane fx:id="inputTextScroll"  layoutX="28.0" layoutY="42.0" prefHeight="366.0" prefWidth="494.0" focusTraversable="true" hbarPolicy="NEVER"  >
+      <TextFlow fx:id="chatDisplay">
+        <padding>
+          <Insets fx:id="inputTextPadding" bottom="5.0"
+                  left="5.0" right="5.0" top="5.0"/>
+        </padding>
+      </TextFlow>
+    </ScrollPane>
     <Button fx:id="sendButton" layoutX="570.0" layoutY="426.0" mnemonicParsing="false" onAction="#handleSendButton" prefWidth="83.0" text="Send">
       <font>
         <Font size="11.0" fx:id="x1" />

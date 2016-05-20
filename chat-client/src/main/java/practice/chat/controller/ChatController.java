@@ -4,10 +4,13 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import practice.chat.main.SceneDispatcher;
 import practice.chat.main.MainApp;
 import practice.chat.protocol.shared.message.TextMessage;
-import practice.chat.protocol.shared.message.common.Text;
+import practice.chat.protocol.shared.message.common.SimpleTextMessage;
 import practice.chat.protocol.shared.message.request.ChangeRoom;
 import practice.chat.protocol.shared.message.request.CreateRoom;
 
@@ -20,7 +23,7 @@ import java.util.ArrayList;
 public class ChatController {
 
     @FXML
-    private TextArea chatDisplay;
+    private TextFlow chatDisplay;
     @FXML
     private TextField textField;
     @FXML
@@ -28,11 +31,15 @@ public class ChatController {
     @FXML
     private Label userAmount;
 
+    @FXML
+    ScrollPane inputTextScroll;
+
     public Label room;
 
     public Label login;
 
     public ChoiceBox<String> roomChoice;
+
 
     private TextFormatter<String> textLengthFormatter = new TextFormatter<>(c -> c
             .getControlNewText().length() > 300 ? null : c);
@@ -55,7 +62,7 @@ public class ChatController {
 
     public void handleCreateRoomButton() {
         userList.clear();
-        chatDisplay.clear();
+        Platform.runLater(()->chatDisplay.getChildren().clear());
         try {
             MainApp.client.sendMessage(new CreateRoom(login.getText()));
         } catch (IOException ex) {
@@ -65,7 +72,7 @@ public class ChatController {
 
     public void handleChangeRoomButton() {
         userList.clear();
-        chatDisplay.clear();
+        Platform.runLater(()->chatDisplay.getChildren().clear());
         try {
             MainApp.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
         } catch (IOException ex) {
@@ -82,7 +89,7 @@ public class ChatController {
         String message = textField.getText();
         if (isValidMessage(message)) {
             try {
-                MainApp.client.sendMessage(new Text(login.getText(),message));
+                MainApp.client.sendMessage(new SimpleTextMessage(login.getText(), message));
                 textField.clear();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -91,7 +98,18 @@ public class ChatController {
     }
 
     public void displayMessage(TextMessage userMessage) {
-        chatDisplay.appendText(userMessage + "\n");
+        Text text = new Text(userMessage.toString() + "\n");
+        if (userMessage.getLogin()!=null && userMessage.getLogin().equals(login.getText())) {
+            text.setStyle("-fx-fill: BLUE;-fx-font-weight:normal;");
+            //chatDisplay.appendText(t2 + "\n");
+        }
+        //chatDisplay.appendText(userMessage + "\n");
+        Platform.runLater(() -> {
+            inputTextScroll.setVvalue(1.0);
+            chatDisplay.getChildren().add(text);
+
+        });
+
     }
 
     public void handleBrokenConnection() { //TODO add notification about connection failure;

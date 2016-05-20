@@ -71,7 +71,7 @@ public class SceneDispatcher {
 
     private void closeApp() {
         Platform.exit();
-        if(MainApp.client!=null) {
+        if (MainApp.client != null) {
             MainApp.client.close();
         }
 

@@ -48,19 +48,12 @@ public class Client extends Thread {
         }
     }
 
-    public void establishConnection() {
+    public void establishConnection() throws Exception {
         InetAddress address;
-        try {
-            address = InetAddress.getByName(ip);
-            socket = new Socket(address, port);
-            output = new ObjectOutputStream(socket.getOutputStream());
-            input = new ObjectInputStream(socket.getInputStream());
-        } catch (Exception ex) {
-            System.out.println("Can not establish connection to backend");
-            ex.printStackTrace();
-        } finally {
-            //Platform.runLater(() -> chatController.handleBrokenConnection());
-        }
+        address = InetAddress.getByName(ip);
+        socket = new Socket(address, port);
+        output = new ObjectOutputStream(socket.getOutputStream());
+        input = new ObjectInputStream(socket.getInputStream());
     }
 
     public void sendMessage(Message message) throws IOException {

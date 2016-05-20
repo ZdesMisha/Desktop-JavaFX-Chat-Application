@@ -68,14 +68,15 @@ public class LoginController {
                     "and less than 65536");
         } else {
             try {
-                sceneDispatcher.switchToChat(); //TODO finish it
+                sceneDispatcher.switchToChat(); //TODO how to print message?????
                 sceneDispatcher.injectLoginLabel(login);
                 MainApp.client = new Client(login, ip, Integer.parseInt(port), sceneDispatcher.getChatController());
                 MainApp.client.establishConnection();
                 MainApp.client.start();
             } catch (Exception ex) {
-                errorMessage.setText("Can not establish connection with backend");
-                System.out.println("Can not establish connection with backend");
+                errorMessage.setText("Can not establish connection with server");
+                sceneDispatcher.switchToLogin();
+                System.out.println("Can not establish connection with server");
                 ex.printStackTrace();
             }
         }

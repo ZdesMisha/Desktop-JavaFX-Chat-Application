@@ -19,14 +19,14 @@
         <Font name="System Bold" size="13.0" fx:id="x1" />
       </font>
     </Label>
-    <Label fx:id="errorMessage" layoutX="70.0" layoutY="246.0" prefWidth="306.0" text="" textAlignment="CENTER" textFill="#ff3333">
+    <Label fx:id="errorMessage" alignment="CENTER" layoutX="73.0" layoutY="282.0" prefHeight="21.0" prefWidth="306.0" text="sdsdsd" textAlignment="CENTER" textFill="#ff3333">
       <font>
         <Font name="System Bold Italic" size="13.0" />
       </font>
     </Label>
     <Label font="$x1" layoutX="163.0" layoutY="191.0" text="Port:" />
     <Label font="$x1" layoutX="163.0" layoutY="149.0" text="IP address:" />
-    <TextField fx:id="ipAddressField" id="ipAddressField" layoutX="161.0" layoutY="165.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="127.0.0.1" />
-    <TextField fx:id="portField" id="portField" layoutX="163.0" layoutY="207.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="1234" />
+    <TextField fx:id="ipAddressField" layoutX="161.0" layoutY="165.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="127.0.0.1" />
+    <TextField fx:id="portField" layoutX="163.0" layoutY="207.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="1234" />
   </children>
 </AnchorPane>
