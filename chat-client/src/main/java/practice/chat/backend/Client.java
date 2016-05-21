@@ -17,30 +17,28 @@ public class Client extends Thread {
 
     private String login;
     private String ip;
-    private int port;
+    private short port;
     private Socket socket;
-    //private String room;
+    private boolean running;
     private ObjectOutputStream output;
     private ObjectInputStream input;
     private ChatController chatController;
 
 
-    public Client(String login, String ip, int port, ChatController chatController) {
+    public Client(String login, String ip, short port, ChatController chatController) {
         this.login = login;
         this.ip = ip;
         this.port = port;
         this.chatController = chatController;
     }
 
-    public void close() { //TODO send logout message
+    public void close() { //TODO logger
         try {
             if (output != null) {
                 output.close();
-            }
-            if (input != null) {
+            } else if (input != null) {
                 input.close();
-            }
-            if (socket != null) {
+            } else if (socket != null) {
                 socket.close();
             }
         } catch (IOException ex) {
@@ -52,31 +50,40 @@ public class Client extends Thread {
         InetAddress address;
         address = InetAddress.getByName(ip);
         socket = new Socket(address, port);
-        output = new ObjectOutputStream(socket.getOutputStream());
-        input = new ObjectInputStream(socket.getInputStream());
     }
 
-    public void sendMessage(Message message) throws IOException {
-        output.writeObject(message);
+    public void sendMessage(Message message) {
+        try {
+            output.writeObject(message);
+        } catch (IOException ex) {
+            ex.printStackTrace(); //TODO logger
+        }
     }
-
 
     public void run() {
+        running=true;
         Message message;
         try {
+            output = new ObjectOutputStream(socket.getOutputStream());
+            input = new ObjectInputStream(socket.getInputStream());
+
             sendMessage(new Login(login));
-            while (true) {
+
+            while (running) {
                 message = (Message) input.readObject();
-                System.out.println(message);
                 processMessage(message);
             }
-        } catch (Exception ex) {
-            System.out.println("Server listener failure!"); //TODO logger
+        } catch (Exception ex) { //TODO logger
             ex.printStackTrace();
         } finally {
-            Platform.runLater(() -> chatController.handleBrokenConnection());
-            close();
+            Platform.runLater(() -> chatController.onDisconnect());
+            close(); //TODO how to avoid it?
         }
+    }
+
+    public void shutdown(){
+        running=false;
+        close();
     }
 
     private void processMessage(Message message) {
@@ -91,11 +98,10 @@ public class Client extends Thread {
 
         } else if (message instanceof CurrentRoom) {
 
-            //room = ((RoomRequest) message).getRoomName();
-            String room = ((CurrentRoom) message).getRoomName(); //TODO if String room really unnecessary?
-            chatController.updateRoomNameLabel(room);
+            String room = ((CurrentRoom) message).getRoomName();
+            chatController.updateRoom(room);
 
-        } else {
+        } else if (message instanceof TextMessage) {
 
             chatController.displayMessage((TextMessage) message);
 

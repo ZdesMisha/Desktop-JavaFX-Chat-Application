@@ -4,17 +4,16 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import practice.chat.main.SceneDispatcher;
 import practice.chat.main.MainApp;
 import practice.chat.protocol.shared.message.TextMessage;
 import practice.chat.protocol.shared.message.common.SimpleTextMessage;
 import practice.chat.protocol.shared.message.request.ChangeRoom;
 import practice.chat.protocol.shared.message.request.CreateRoom;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -47,7 +46,7 @@ public class ChatController {
     private SceneDispatcher sceneDispatcher;
 
     @FXML
-    public void initialize() { ///TODO may be it would be better to move something else to initializer?
+    public void initialize() {
         textField.setTextFormatter(textLengthFormatter);
         textField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
@@ -61,59 +60,48 @@ public class ChatController {
     }
 
     public void handleCreateRoomButton() {
-        userList.clear();
-        Platform.runLater(()->chatDisplay.getChildren().clear());
-        try {
-            MainApp.client.sendMessage(new CreateRoom(login.getText()));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+//        userList.clear(); //TODO????
+//        chatDisplay.getChildren().clear();
+        MainApp.client.sendMessage(new CreateRoom(login.getText()));
+
     }
 
     public void handleChangeRoomButton() {
-        userList.clear();
-        Platform.runLater(()->chatDisplay.getChildren().clear());
-        try {
-            MainApp.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+//        userList.clear();//TODO????
+//        chatDisplay.getChildren().clear();
+        MainApp.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
+
     }
 
     public void handleLogoutButton() {
-        sceneDispatcher.switchToLogin();
-        MainApp.client.close();
+        MainApp.client.shutdown();
+
     }
 
     public void handleSendButton() {
         String message = textField.getText();
         if (isValidMessage(message)) {
-            try {
-                MainApp.client.sendMessage(new SimpleTextMessage(login.getText(), message));
-                textField.clear();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            MainApp.client.sendMessage(new SimpleTextMessage(login.getText(), message));
+            textField.clear();
         }
     }
 
     public void displayMessage(TextMessage userMessage) {
         Text text = new Text(userMessage.toString() + "\n");
-        if (userMessage.getLogin()!=null && userMessage.getLogin().equals(login.getText())) {
-            text.setStyle("-fx-fill: BLUE;-fx-font-weight:normal;");
-            //chatDisplay.appendText(t2 + "\n");
+        text.setFont(Font.font(11));
+        if (userMessage.getLogin().equals(login.getText())) {
+            text.setFill(Color.DEEPSKYBLUE);
         }
-        //chatDisplay.appendText(userMessage + "\n");
         Platform.runLater(() -> {
             inputTextScroll.setVvalue(1.0);
             chatDisplay.getChildren().add(text);
-
         });
-
     }
 
-    public void handleBrokenConnection() { //TODO add notification about connection failure;
+    public void onDisconnect() { //TODO add notification about connection failure;
         sceneDispatcher.switchToLogin();
+        showAlertBox("Connection closed");
+
     }
 
     public void updateUserList(ArrayList<String> users) {
@@ -136,15 +124,23 @@ public class ChatController {
         });
     }
 
-    public void updateRoomNameLabel(String roomName) {
+    public void updateRoom(String roomName) {
         Platform.runLater(() -> {
+            userList.clear(); //TODO????
+            chatDisplay.getChildren().clear();
             room.setText(roomName);
-            roomChoice.setValue(roomName); //TODO make sure it will always work correct
+            roomChoice.setValue(roomName);
         });
     }
 
     private boolean isValidMessage(String message) {
         return message.matches(".+");
+    }
+
+    private void showAlertBox(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(message);
+        alert.show();
     }
 
 

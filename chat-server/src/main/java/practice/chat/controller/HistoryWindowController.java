@@ -1,11 +1,14 @@
 package practice.chat.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import practice.chat.history.HistoryManager;
-import practice.chat.main.SceneDispatcher;
+import practice.chat.history.HistoryReader;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by misha on 18.05.16.
@@ -28,7 +31,7 @@ public class HistoryWindowController {
 
     private SceneDispatcher sceneDispatcher;
 
-    private HistoryManager historyManager = HistoryManager.getInstance();
+    private HistoryReader historyReader = HistoryReader.getInstance();
 
     public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
         this.sceneDispatcher = sceneDispatcher;
@@ -36,12 +39,11 @@ public class HistoryWindowController {
 
     @FXML
     public void initialize() {
-        roomName.setText("MainRoom"); //TODO check if room name is empty( add on ServerController side) and HOW TO MAKE IT WORK PROPER!!???
         previousButton.setDisable(true);
-        showHistory();
     }
 
     public void handlePreviousButton() {
+        nextButton.setDisable(false);
         if (page <= 1) {
             previousButton.setDisable(true);
         } else {
@@ -58,9 +60,27 @@ public class HistoryWindowController {
 
     public void showHistory() {
         textArea.clear();
-        for (String line : historyManager.readHistory(roomName.getText(), page)) {
-            textArea.appendText(line + "\n");
+        Optional<List<String>> history = Optional.of(historyReader.readHistory(roomName.getText(), page)); //TODO to read about optional
+        if (history.isPresent()) {
+            if (history.get().isEmpty()) {
+                nextButton.setDisable(true);
+            } else {
+                for (String line : history.get()) {
+                    textArea.appendText(line + "\n");
+                }
+            }
+        } else {
+            showAlertBox("File is not exist");
         }
+    }
+    private void showAlertBox(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setContentText(message);
+        alert.show();
+    }
+
+    public void setRoomLable(String name){
+        roomName.setText(name);
     }
 
 }

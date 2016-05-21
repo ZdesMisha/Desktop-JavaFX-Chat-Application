@@ -64,13 +64,13 @@ public class Chat {
         changeRoom(client, newRoom);
     }
 
-    private void removeRoom(Room room) {
+    private void closeRoom(Client client,Room room) {
         synchronized (rooms) {
             if (room.isMainRoom()) {
                 return;
             } else {
                 rooms.remove(room.getName());
-                RoomClosed roomClosedMessage = new RoomClosed(room.getName(),new Date());
+                RoomClosed roomClosedMessage = new RoomClosed(client.getLogin(),room.getName(),new Date());
                 broadcastChatMessage(roomClosedMessage);
                 for(Room r : rooms.values()){
                     r.saveMessageInQueue(roomClosedMessage);
@@ -90,7 +90,7 @@ public class Chat {
         newRoom.addUser(client);
         synchronized (rooms) {
             if (oldRoom.isEmpty()) {
-                removeRoom(oldRoom);
+                closeRoom(client,oldRoom);
             }
         }
     }

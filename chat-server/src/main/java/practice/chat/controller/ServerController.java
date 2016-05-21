@@ -6,19 +6,19 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
-import practice.chat.history.HistoryManager;
-import practice.chat.main.SceneDispatcher;
+import practice.chat.history.HistoryReader;
+import practice.chat.history.HistoryWriter;
 import practice.chat.main.ServerApp;
 import practice.chat.backend.Server;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by misha on 17.05.16.
  */
 public class ServerController {
 
-    private HistoryManager historyManager = HistoryManager.getInstance();
+    private HistoryReader historyReader = HistoryReader.getInstance();
 
     @FXML
     private TextArea serverLog;
@@ -37,41 +37,40 @@ public class ServerController {
         this.sceneDispatcher = sceneDispatcher;
     }
 
+    @FXML
+    public void initialize(){
+        updateRoomList(historyReader.getHistoryFileNames());
+    }
+
 
     public void handleRunButton() {
-        displayMessage("Starting backend...");
+        displayMessage("Starting server...");
         ServerApp.server = new Server(sceneDispatcher.getServerController());
         ServerApp.server.start();
-        updateRoomList(historyManager.getHistoryFileNames());
         runButton.setDisable(true);
         shutdownButton.setDisable(false);
 
     }
 
     public void handleUpdateHistoryListButton() {
-        updateRoomList(historyManager.getHistoryFileNames());
+        updateRoomList(historyReader.getHistoryFileNames());
     }
 
     public void handleShutdownButton() {
-        // Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() { //TODO implement it somewhere...
-        //    public void run() {
-        displayMessage("Shutdown backend...");
+        displayMessage("Shutdown server...");
         ServerApp.server.shutdown();
         displayMessage("Server is down");
         runButton.setDisable(false);
         shutdownButton.setDisable(true);
-        //     }
-        // }));
     }
 
     public void handleShowHistoryButton() {
-        if (roomChoice.getValue()!=null){
+        if (roomChoice.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("You have to chose room!");
             alert.show();
         }
-        sceneDispatcher.openHistoryWindow();
-        //sceneDispatcher.setRoomName(roomChoice.getValue());
+        sceneDispatcher.openHistoryWindow(roomChoice.getValue());
 
     }
 
@@ -79,13 +78,13 @@ public class ServerController {
         serverLog.appendText(message + "\n");
     }
 
-    private void updateRoomList(ArrayList<String> rooms) { ///TODO fix this shit
+    private void updateRoomList(List<String> rooms) {
         Platform.runLater(() -> {
             roomChoice.getItems().clear();
             for (String room : rooms) {
                 roomChoice.getItems().add(room);
             }
-            roomChoice.setValue("MainRoom");
+            roomChoice.setValue("MainRoom");///TODO fix this shit
         });
     }
 

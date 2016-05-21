@@ -1,7 +1,7 @@
 package practice.chat.backend;
 
 
-import practice.chat.history.HistoryManager;
+import practice.chat.history.HistoryWriter;
 import practice.chat.protocol.shared.message.Message;
 import practice.chat.protocol.shared.message.TextMessage;
 import practice.chat.protocol.shared.message.response.info.CurrentRoom;
@@ -21,11 +21,11 @@ public class Room {
     private boolean isMainRoom;
     private static int roomCounter = 1;
     private String name;
-    private HistoryManager historyManager = HistoryManager.getInstance();
+    private HistoryWriter historyManager = HistoryWriter.getInstance();
 
-    private final ArrayList<Message> history = new ArrayList<>();
+    private final List<Message> history = new ArrayList<>();
     private final Queue<Message> recentMessages = new LinkedList<>();
-    private final ArrayList<Client> users = new ArrayList<>();
+    private final List<Client> users = new ArrayList<>();
 
 
     public Room(Chat chat) {
@@ -114,7 +114,7 @@ public class Room {
     public synchronized void saveHistory() {
         history.addAll(recentMessages);
         historyManager.writeHistory(history, this.getName());
-        this.history.clear();
+        history.clear();
     }
 
     private void sendRecentMessages(Client client) {
@@ -128,9 +128,11 @@ public class Room {
     }
 
     public void closeClientConnections() {
-
         saveHistory();
-        users.forEach(Client::closeConnection);
+        System.out.println(this.getName());
+        synchronized (users) {
+            users.forEach(Client::closeConnection);
+        }
     }
 
     @Override

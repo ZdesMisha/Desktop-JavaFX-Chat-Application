@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import practice.chat.backend.Client;
 import practice.chat.main.MainApp;
-import practice.chat.main.SceneDispatcher;
 
 /**
  * Created by misha on 10.05.16.
@@ -32,9 +31,6 @@ public class LoginController {
     private TextField ipAddressField;
     @FXML
     private TextField portField;
-
-    @FXML
-    private Label errorMessage;
 
     private SceneDispatcher sceneDispatcher;
 
@@ -68,16 +64,18 @@ public class LoginController {
                     "and less than 65536");
         } else {
             try {
-                sceneDispatcher.switchToChat(); //TODO how to print message?????
+                sceneDispatcher.switchToChat();
                 sceneDispatcher.injectLoginLabel(login);
-                MainApp.client = new Client(login, ip, Integer.parseInt(port), sceneDispatcher.getChatController());
+                MainApp.client = new Client(login, ip, Short.parseShort(port), sceneDispatcher.getChatController());
                 MainApp.client.establishConnection();
                 MainApp.client.start();
             } catch (Exception ex) {
-                errorMessage.setText("Can not establish connection with server");
                 sceneDispatcher.switchToLogin();
-                System.out.println("Can not establish connection with server");
-                ex.printStackTrace();
+                showAlertBox("Can not establish connection to server\n" +
+                        "Possible reasons:\n" +
+                        "* Server is offline\n" +
+                        "* Wrong server address");
+                ex.printStackTrace(); //TODO logger
             }
         }
     }

@@ -12,7 +12,7 @@ import java.net.Socket;
 public class Server extends Thread {
 
     private static final int PORT = 1234; //TODO move to config
-    private boolean running = false;
+    private boolean running = false; //TODO synchronu=nized?:
     private Chat chat;
     private ServerSocket serverSocket;
     public ServerController serverController;
@@ -37,14 +37,13 @@ public class Server extends Thread {
             System.out.println("Server failure"); //TODO  logger
             ex.printStackTrace();
         } finally {
-            shutdown();
+            chat.stop();
         }
     }
 
     public void shutdown() {
+        running=false;
         try {
-            running = false;
-            chat.stop();
             serverSocket.close();
         } catch (IOException ex) {
             System.out.println("Can not shutdown Server correctly");
