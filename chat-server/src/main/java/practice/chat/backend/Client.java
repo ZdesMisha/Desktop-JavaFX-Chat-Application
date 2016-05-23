@@ -86,7 +86,7 @@ public class Client extends Thread {
 
     public void sendMessage(Message message) {
         try {
-            output.writeObject(message);
+                output.writeObject(message);
         } catch (IOException e) {
             e.printStackTrace(); //TODO logger
         }

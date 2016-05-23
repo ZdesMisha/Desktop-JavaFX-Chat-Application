@@ -16,7 +16,7 @@ import practice.chat.protocol.shared.message.request.CreateRoom;
 import practice.chat.protocol.shared.message.response.text.NewUser;
 import practice.chat.protocol.shared.message.response.text.UserLeft;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by misha on 06.05.16.
@@ -68,9 +68,14 @@ public class ChatController {
     }
 
     public void handleChangeRoomButton() {
+        String currentRoom = room.getText();
+        String roomToJoin = roomChoice.getValue();
+        if(currentRoom.equals(roomToJoin)) {
+            return;
+        }
         userList.clear();
         chatDisplay.getChildren().clear();
-        applicationDispatcher.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
+        applicationDispatcher.client.sendMessage(new ChangeRoom(roomToJoin));
 
     }
 
@@ -114,7 +119,7 @@ public class ChatController {
 
     }
 
-    public void updateUserList(ArrayList<String> users) {
+    public void updateUserList(List<String> users) {
         userList.clear();
         for (String user : users) {
             userList.appendText(user + "\n");
@@ -122,7 +127,7 @@ public class ChatController {
         userAmount.setText(users.size() + "");
     }
 
-    public void updateRoomList(ArrayList<String> rooms) {
+    public void updateRoomList(List<String> rooms) {
         roomChoice.getItems().clear();
         for (String room : rooms) {
             roomChoice.getItems().add(room);

@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by misha on 21.05.16.
@@ -25,25 +22,25 @@ public class HistoryReader {
     }
 
 
-    public ArrayList<String> readHistory(String room, int page) {
+    public Optional<List<String>> readHistory(String room, int page) { //TODO ???
         long startRecord = RECORDS_PER_PAGE * (page - 1) + 1;
         int readsCounter = 0;
         ArrayList<String> history = new ArrayList<>();
         Path path = Paths.get(HISTORY_PATH + File.separator + room);
         try {
-            if(Files.exists(path)) {
+            if (Files.exists(path)) {
                 Iterator<String> iterator = Files.lines(Paths.get(HISTORY_PATH + File.separator + room)).skip(startRecord - 1).iterator();
                 while (iterator.hasNext() && readsCounter < RECORDS_PER_PAGE) {
                     readsCounter++;
                     history.add(iterator.next());
                 }
             } else {
-                return null;
+                return Optional.empty();
             }
-            return history;
+            return Optional.of(history);
         } catch (IOException ex) {//TODO add logger
             ex.printStackTrace();
-            return null;
+            return Optional.empty();
         }
     }
 

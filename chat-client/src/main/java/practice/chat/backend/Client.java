@@ -73,7 +73,6 @@ public class Client extends Thread {
         }
     }
     private void processMessage(Message message) {
-        System.out.println(message);
 
         if (message instanceof ViolatedLoginUniqueConstraint) {
 

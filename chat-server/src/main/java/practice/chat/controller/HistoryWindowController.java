@@ -61,7 +61,7 @@ public class HistoryWindowController {
 
     public void showHistory() {
         textArea.clear();
-        Optional<List<String>> history = Optional.of(historyReader.readHistory(roomName.getText(), page)); //TODO to read about optional
+        Optional<List<String>> history = historyReader.readHistory(roomName.getText(), page); //TODO to read about optional
         if (history.isPresent()) {
             if (history.get().isEmpty()) {
                 nextButton.setDisable(true);
@@ -71,7 +71,7 @@ public class HistoryWindowController {
                 }
             }
         } else {
-            showAlertBox("File is not exist");
+            showAlertBox("File does not exist");
         }
     }
     private void showAlertBox(String message) {

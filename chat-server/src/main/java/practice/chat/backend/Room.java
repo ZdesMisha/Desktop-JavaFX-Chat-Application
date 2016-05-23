@@ -11,6 +11,8 @@ import practice.chat.protocol.shared.message.response.text.NewUser;
 import practice.chat.protocol.shared.message.response.text.UserLeft;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Created by misha on 04.05.16.
@@ -21,11 +23,11 @@ public class Room {
     public static final int HISTORY_SIZE = 10;
     private Chat chat;
     private boolean isMainRoom;
-    private static int roomCounter = 1;
+    private static int roomCounter = 1; //TODO volatile?
     private String name;
     private HistoryWriter historyManager = HistoryWriter.getInstance();
 
-    private final List<Client> users = new ArrayList<>();
+    private final List<Client> users = new CopyOnWriteArrayList<>();
     private final List<Message> history = new ArrayList<>();
     private final Queue<Message> recentMessages = new LinkedList<>();
 
@@ -48,17 +50,13 @@ public class Room {
     }
 
     public void broadcastMessage(Message message) {
-        synchronized (users) {
-            for (Client client : users) {
-                client.sendMessage(message);
-            }
+        for (Client client : users) {
+            client.sendMessage(message);
         }
     }
 
     public boolean isEmpty() {
-        synchronized (users) {
-            return users.isEmpty();
-        }
+        return users.isEmpty();
     }
 
     public boolean isMainRoom() {
@@ -70,9 +68,7 @@ public class Room {
         sendRecentMessages(client);
         client.sendMessage(new CurrentRoom(this.getName()));
         client.sendMessage(new RoomList(chat.prepareRoomList()));
-        synchronized (users) {
-            users.add(client);
-        }
+        users.add(client);
         client.setRoom(this);
         NewUser loginMessage = new NewUser(client.getLogin(), new Date());
         saveMessageInQueue(loginMessage);
@@ -82,23 +78,15 @@ public class Room {
 
 
     public void removeUser(Client client) {
-        synchronized (users) {
-            users.remove(client);
-        }
+        users.remove(client);
         UserLeft logoutMessage = new UserLeft(client.getLogin(), new Date());
         saveMessageInQueue(logoutMessage);
         broadcastMessage(logoutMessage);
         broadcastMessage(new UserList(prepareUserList()));
     }
 
-    private ArrayList<String> prepareUserList() {
-        ArrayList<String> userList = new ArrayList<>();
-        synchronized (users) {
-            for (Client user : users) {
-                userList.add(user.getLogin());
-            }
-        }
-        return userList;
+    private List<String> prepareUserList() {
+        return users.stream().map(Client::getLogin).collect(Collectors.toList());
     }
 
     public synchronized void saveMessageInQueue(TextMessage message) {
@@ -117,10 +105,8 @@ public class Room {
         history.clear();
     }
 
-    private void sendRecentMessages(Client client) {
-        synchronized (recentMessages) {
-            recentMessages.forEach(client::sendMessage);
-        }
+    private synchronized void sendRecentMessages(Client client) {
+        recentMessages.forEach(client::sendMessage);
     }
 
     public String getName() {
@@ -129,9 +115,7 @@ public class Room {
 
     public void closeClientConnections() {
         saveHistory();
-        synchronized (users) {
-            users.forEach(Client::closeConnection);
-        }
+        users.forEach(Client::closeConnection);
     }
 
     @Override
