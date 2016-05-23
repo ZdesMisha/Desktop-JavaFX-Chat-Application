@@ -3,7 +3,7 @@ package practice.chat.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import practice.chat.backend.Client;
-import practice.chat.main.MainApp;
+import practice.chat.dispatcher.ApplicationDispatcher;
 
 /**
  * Created by misha on 10.05.16.
@@ -31,8 +31,10 @@ public class LoginController {
     private TextField ipAddressField;
     @FXML
     private TextField portField;
+    @FXML
+    public Label message;
 
-    private SceneDispatcher sceneDispatcher;
+    private ApplicationDispatcher applicationDispatcher;
 
     private TextFormatter<String> loginTextLengthFormatter = new TextFormatter<>(c -> c
             .getControlNewText().length() > 10 ? null : c);
@@ -64,13 +66,13 @@ public class LoginController {
                     "and less than 65536");
         } else {
             try {
-                sceneDispatcher.switchToChat();
-                sceneDispatcher.injectLoginLabel(login);
-                MainApp.client = new Client(login, ip, Short.parseShort(port), sceneDispatcher.getChatController());
-                MainApp.client.establishConnection();
-                MainApp.client.start();
+                applicationDispatcher.switchToChat();
+                applicationDispatcher.injectLoginLabel(login);
+                applicationDispatcher.client = new Client(login, ip, Short.parseShort(port), applicationDispatcher.getChatController());
+                applicationDispatcher.client.establishConnection();
+                applicationDispatcher.client.start();
             } catch (Exception ex) {
-                sceneDispatcher.switchToLogin();
+                applicationDispatcher.switchToLogin();
                 showAlertBox("Can not establish connection to server\n" +
                         "Possible reasons:\n" +
                         "* Server is offline\n" +
@@ -102,7 +104,9 @@ public class LoginController {
         alert.show();
     }
 
-    public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
-        this.sceneDispatcher = sceneDispatcher;
+    public void setApplicationDispatcher(ApplicationDispatcher applicationDispatcher) {
+        this.applicationDispatcher = applicationDispatcher;
     }
+
+
 }

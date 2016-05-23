@@ -1,10 +1,6 @@
 package practice.chat.history;
 
-import practice.chat.protocol.shared.message.Message;
-
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -5,6 +5,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import practice.chat.dispatcher.ApplicationDispatcher;
 import practice.chat.history.HistoryReader;
 
 import java.util.List;
@@ -29,12 +30,12 @@ public class HistoryWindowController {
 
     private int page = 1;
 
-    private SceneDispatcher sceneDispatcher;
+    private ApplicationDispatcher applicationDispatcher;
 
     private HistoryReader historyReader = HistoryReader.getInstance();
 
-    public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
-        this.sceneDispatcher = sceneDispatcher;
+    public void setApplicationDispatcher(ApplicationDispatcher applicationDispatcher) {
+        this.applicationDispatcher = applicationDispatcher;
     }
 
     @FXML

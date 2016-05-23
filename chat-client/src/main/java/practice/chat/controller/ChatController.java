@@ -8,11 +8,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import practice.chat.main.MainApp;
+import practice.chat.dispatcher.ApplicationDispatcher;
 import practice.chat.protocol.shared.message.TextMessage;
 import practice.chat.protocol.shared.message.common.SimpleTextMessage;
 import practice.chat.protocol.shared.message.request.ChangeRoom;
 import practice.chat.protocol.shared.message.request.CreateRoom;
+import practice.chat.protocol.shared.message.response.text.NewUser;
+import practice.chat.protocol.shared.message.response.text.UserLeft;
 
 import java.util.ArrayList;
 
@@ -29,7 +31,6 @@ public class ChatController {
     private TextArea userList;
     @FXML
     private Label userAmount;
-
     @FXML
     ScrollPane inputTextScroll;
 
@@ -43,7 +44,7 @@ public class ChatController {
     private TextFormatter<String> textLengthFormatter = new TextFormatter<>(c -> c
             .getControlNewText().length() > 300 ? null : c);
 
-    private SceneDispatcher sceneDispatcher;
+    private ApplicationDispatcher applicationDispatcher;
 
     @FXML
     public void initialize() {
@@ -55,41 +56,50 @@ public class ChatController {
         });
     }
 
-    public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
-        this.sceneDispatcher = sceneDispatcher;
+    public void setApplicationDispatcher(ApplicationDispatcher applicationDispatcher) {
+        this.applicationDispatcher = applicationDispatcher;
     }
 
     public void handleCreateRoomButton() {
-//        userList.clear(); //TODO????
-//        chatDisplay.getChildren().clear();
-        MainApp.client.sendMessage(new CreateRoom(login.getText()));
+        userList.clear();
+        chatDisplay.getChildren().clear();
+        applicationDispatcher.client.sendMessage(new CreateRoom(login.getText()));
 
     }
 
     public void handleChangeRoomButton() {
-//        userList.clear();//TODO????
-//        chatDisplay.getChildren().clear();
-        MainApp.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
+        userList.clear();
+        chatDisplay.getChildren().clear();
+        applicationDispatcher.client.sendMessage(new ChangeRoom(roomChoice.getValue()));
 
     }
 
     public void handleLogoutButton() {
-        MainApp.client.shutdown();
+        applicationDispatcher.client.close();
 
     }
 
     public void handleSendButton() {
         String message = textField.getText();
         if (isValidMessage(message)) {
-            MainApp.client.sendMessage(new SimpleTextMessage(login.getText(), message));
+            applicationDispatcher.client.sendMessage(new SimpleTextMessage(login.getText(), message));
             textField.clear();
         }
     }
 
-    public void displayMessage(TextMessage userMessage) {
-        Text text = new Text(userMessage.toString() + "\n");
+    public void displayMessage(TextMessage message) {
+        Text text = new Text(message.toString() + "\n");
         text.setFont(Font.font(11));
-        if (userMessage.getLogin().equals(login.getText())) {
+        if (message instanceof NewUser) {
+
+            text.setFill(Color.GREEN);
+
+        } else if (message instanceof UserLeft) {
+
+            text.setFill(Color.DARKRED);
+
+        } else if (message.getLogin().equals(login.getText())) {
+
             text.setFill(Color.DEEPSKYBLUE);
         }
         Platform.runLater(() -> {
@@ -99,38 +109,30 @@ public class ChatController {
     }
 
     public void onDisconnect() { //TODO add notification about connection failure;
-        sceneDispatcher.switchToLogin();
-        showAlertBox("Connection closed");
+        applicationDispatcher.switchToLogin();
+        showAlertBox("Disconnected");
 
     }
 
     public void updateUserList(ArrayList<String> users) {
-        Platform.runLater(() -> {
-            userList.clear();
-            for (String user : users) {
-                userList.appendText(user + "\n");
-            }
-            userAmount.setText(users.size() + "");
-        });
+        userList.clear();
+        for (String user : users) {
+            userList.appendText(user + "\n");
+        }
+        userAmount.setText(users.size() + "");
     }
 
     public void updateRoomList(ArrayList<String> rooms) {
-        Platform.runLater(() -> {
-            roomChoice.getItems().clear();
-            for (String room : rooms) {
-                roomChoice.getItems().add(room);
-            }
-            roomChoice.setValue(room.getText());
-        });
+        roomChoice.getItems().clear();
+        for (String room : rooms) {
+            roomChoice.getItems().add(room);
+        }
+        roomChoice.setValue(room.getText());
     }
 
     public void updateRoom(String roomName) {
-        Platform.runLater(() -> {
-            userList.clear(); //TODO????
-            chatDisplay.getChildren().clear();
-            room.setText(roomName);
-            roomChoice.setValue(roomName);
-        });
+        room.setText(roomName);
+        roomChoice.setValue(roomName);
     }
 
     private boolean isValidMessage(String message) {
@@ -142,6 +144,4 @@ public class ChatController {
         alert.setContentText(message);
         alert.show();
     }
-
-
 }

@@ -1,13 +1,14 @@
-package practice.chat.controller;
+package practice.chat.dispatcher;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import practice.chat.backend.Server;
 import practice.chat.controller.HistoryWindowController;
 import practice.chat.controller.ServerController;
-import practice.chat.main.ServerApp;
+import practice.chat.utils.ResourceCloser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,13 +16,15 @@ import java.io.InputStream;
 /**
  * Created by misha on 18.05.16.
  */
-public class SceneDispatcher {
+public class ApplicationDispatcher {
+
+    public Server server;
 
     private Stage stage;
     private HistoryWindowController historyWindowController;
     private ServerController serverController;
 
-    public SceneDispatcher(Stage stage) {
+    public ApplicationDispatcher(Stage stage) {
         this.stage = stage;
         this.stage.setTitle("Chat Server");
         this.stage.show();
@@ -36,11 +39,11 @@ public class SceneDispatcher {
             stream = getClass().getResourceAsStream(fxmlFile);
             Parent root = loader.load(stream);
             serverController = loader.getController();
-            serverController.setSceneDispatcher(this);
+            serverController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException ex) {
-            closeQuietly(stream);
+            ResourceCloser.closeQuietly(stream);
             ex.printStackTrace();
         }
     }
@@ -56,30 +59,20 @@ public class SceneDispatcher {
             window.setScene(new Scene(root));
             window.show();
             historyWindowController = loader.getController();
-            historyWindowController.setSceneDispatcher(this);
+            historyWindowController.setApplicationDispatcher(this);
             historyWindowController.setRoomLable(roomName);
             historyWindowController.showHistory();
         } catch (IOException ex) {
-            closeQuietly(stream);
+            ResourceCloser.closeQuietly(stream);
             ex.printStackTrace();
         }
 
     }
 
-    private void closeQuietly(InputStream stream) {
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void closeApp() {
         Platform.exit();
-        if(ServerApp.server!=null) {
-            ServerApp.server.shutdown();
+        if(server!=null) {
+            server.shutdown();
         }
     }
 

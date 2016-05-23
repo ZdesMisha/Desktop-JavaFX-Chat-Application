@@ -12,7 +12,7 @@ import java.net.Socket;
 public class Server extends Thread {
 
     private static final int PORT = 1234; //TODO move to config
-    private boolean running = false; //TODO synchronu=nized?:
+    private boolean running = false; //TODO synchronized?:
     private Chat chat;
     private ServerSocket serverSocket;
     public ServerController serverController;

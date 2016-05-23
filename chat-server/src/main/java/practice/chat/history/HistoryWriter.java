@@ -1,6 +1,7 @@
 package practice.chat.history;
 
 import practice.chat.protocol.shared.message.Message;
+import practice.chat.utils.ResourceCloser;
 
 import java.io.*;
 import java.util.*;
@@ -8,7 +9,7 @@ import java.util.*;
 /**
  * Created by misha on 18.05.16.
  */
-public class HistoryWriter { //TODO does it should provide new instance for each request or singleton will be enough?
+public class HistoryWriter {
 
     private final String HOME_DIR = System.getProperty("user.home");
     private final String HISTORY_DIR_NAME = "ChatHistory";
@@ -23,26 +24,17 @@ public class HistoryWriter { //TODO does it should provide new instance for each
         File roomFile = new File(HISTORY_PATH + File.separator + room);
         BufferedWriter output = null;
         try {
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
-            if (!roomFile.exists()) {
-                roomFile.createNewFile();
-            }
+            dir.mkdir(); // TODO check result
+            roomFile.createNewFile(); // TODO check result
+
             output = new BufferedWriter(new FileWriter(roomFile, true));
             for (Message message : history) {
                 output.write(message + "\n");
             }
-        } catch (IOException ex) { //TODO add logger
+        } catch (Exception ex) { //TODO add logger
             ex.printStackTrace();
         } finally {
-            try {
-                if (output != null) {
-                    output.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            ResourceCloser.closeQuietly(output);
         }
     }
 }

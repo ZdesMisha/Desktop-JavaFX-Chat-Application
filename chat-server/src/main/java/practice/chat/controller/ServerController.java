@@ -6,9 +6,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
+import practice.chat.dispatcher.ApplicationDispatcher;
 import practice.chat.history.HistoryReader;
-import practice.chat.history.HistoryWriter;
-import practice.chat.main.ServerApp;
 import practice.chat.backend.Server;
 
 import java.util.List;
@@ -31,10 +30,10 @@ public class ServerController {
 
     public ChoiceBox<String> roomChoice;
 
-    private SceneDispatcher sceneDispatcher;
+    private ApplicationDispatcher applicationDispatcher;
 
-    public void setSceneDispatcher(SceneDispatcher sceneDispatcher) {
-        this.sceneDispatcher = sceneDispatcher;
+    public void setApplicationDispatcher(ApplicationDispatcher applicationDispatcher) {
+        this.applicationDispatcher = applicationDispatcher;
     }
 
     @FXML
@@ -45,8 +44,8 @@ public class ServerController {
 
     public void handleRunButton() {
         displayMessage("Starting server...");
-        ServerApp.server = new Server(sceneDispatcher.getServerController());
-        ServerApp.server.start();
+        applicationDispatcher.server = new Server(applicationDispatcher.getServerController());
+        applicationDispatcher.server.start();
         runButton.setDisable(true);
         shutdownButton.setDisable(false);
 
@@ -58,7 +57,7 @@ public class ServerController {
 
     public void handleShutdownButton() {
         displayMessage("Shutdown server...");
-        ServerApp.server.shutdown();
+        applicationDispatcher.server.shutdown();
         displayMessage("Server is down");
         runButton.setDisable(false);
         shutdownButton.setDisable(true);
@@ -70,7 +69,7 @@ public class ServerController {
             alert.setContentText("You have to chose room!");
             alert.show();
         }
-        sceneDispatcher.openHistoryWindow(roomChoice.getValue());
+        applicationDispatcher.openHistoryWindow(roomChoice.getValue());
 
     }
 

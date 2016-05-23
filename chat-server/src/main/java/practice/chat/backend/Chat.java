@@ -23,6 +23,7 @@ public class Chat {
     }
 
     public final Map<String, Room> rooms = new HashMap<>();
+    public final Set<String> chatUsers = new HashSet<>();
 
     public Chat() {
         rooms.put("MainRoom", new Room("MainRoom", this));
@@ -30,73 +31,76 @@ public class Chat {
 
 
     public void addToMainRoom(Client client) {
-        synchronized (rooms) { // TODO implement user name validation
-            rooms.get("MainRoom").addUser(client);
+        // TODO synch by chatUsers too
+        synchronized (rooms) {  // no need
+            if (chatUsers.contains(client.getLogin())) {
+                client.HowToNameThisMethod();
+            } else {
+                chatUsers.add(client.getLogin());
+                rooms.get("MainRoom").addUser(client);
+            }
         }
     }
 
     public void addUserToChat(Socket socket) {
         Client client = new Client(socket);
-//        client.onInit(() -> {
-//            sendRecentMessages(client);
-//            client.sendMessage(new RoomRequest("MainRoom"));
-//        });
         client.start();
     }
 
+    public void removeUserFromChat(Client client) { //TODO synch
+        chatUsers.remove(client.getName());
+        client.getRoom().removeUser(client); //TODO looks not well
+    }
+
     public void stop() {
-        synchronized (rooms) {
+        synchronized (rooms) {  // being changed
             rooms.values().forEach(Room::closeClientConnections);
         }
     }
 
     public void createNewRoom(Client client) {
         Room newRoom = new Room(this);
-        synchronized (rooms) {
+        synchronized (rooms) { // being changed
             rooms.put(newRoom.getName(), newRoom);
-        }
-        broadcastChatMessage(new RoomList(prepareRoomList()));
-        RoomCreated newRoomMessage = new RoomCreated(client.getLogin(),newRoom.getName(),new Date());
-        broadcastChatMessage(newRoomMessage);
-        for(Room r : rooms.values()){
-            r.saveMessageInQueue(newRoomMessage);
-        }
-        changeRoom(client, newRoom);
-    }
+            changeRoom(client, newRoom);
 
-    private void closeRoom(Client client,Room room) {
-        synchronized (rooms) {
-            if (room.isMainRoom()) {
-                return;
-            } else {
-                rooms.remove(room.getName());
-                RoomClosed roomClosedMessage = new RoomClosed(client.getLogin(),room.getName(),new Date());
-                broadcastChatMessage(roomClosedMessage);
-                for(Room r : rooms.values()){
-                    r.saveMessageInQueue(roomClosedMessage);
-                }
-                broadcastChatMessage(new RoomList(prepareRoomList()));
-                room.saveHistory();
-            }
+            broadcastChatMessage(new RoomList(prepareRoomList()));
         }
     }
 
-    public void changeRoom(Client client, Room newRoom) {
-        Room oldRoom = client.getRoom();
-        if (oldRoom.equals(newRoom)) {
+    private void closeRoom(Client client, Room room) {
+
+        if (room.isMainRoom()) {
             return;
         }
+
+        synchronized (rooms) { // change
+            rooms.remove(room.getName());
+            RoomClosed roomClosedMessage = new RoomClosed(client.getLogin(), room.getName(), new Date());
+            broadcastChatMessage(roomClosedMessage);
+            for (Room r : rooms.values()) {
+                r.saveMessageInQueue(roomClosedMessage);
+            }
+            broadcastChatMessage(new RoomList(prepareRoomList()));
+            room.saveHistory();
+
+        }
+    }
+
+    public void changeRoom(Client client, Room newRoom) { //TODO refactor synch block
+        if (newRoom == null) {
+            newRoom = client.getRoom();
+        }
+        Room oldRoom = client.getRoom();
         oldRoom.removeUser(client);
         newRoom.addUser(client);
-        synchronized (rooms) {
-            if (oldRoom.isEmpty()) {
-                closeRoom(client,oldRoom);
-            }
+        if (oldRoom.isEmpty()) {
+            closeRoom(client, oldRoom);
         }
     }
 
     public void broadcastChatMessage(Message message) {
-        synchronized (rooms) {
+        synchronized (rooms) { // no changes
             for (Room room : rooms.values()) {
                 room.broadcastMessage(message);
             }
@@ -104,7 +108,7 @@ public class Chat {
     }
 
     public ArrayList<String> prepareRoomList() {
-        synchronized (rooms) {
+        synchronized (rooms) { // no need
             return new ArrayList<>(rooms.keySet());
         }
     }

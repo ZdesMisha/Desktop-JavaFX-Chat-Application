@@ -2,8 +2,7 @@ package practice.chat.main;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import practice.chat.backend.Client;
-import practice.chat.controller.SceneDispatcher;
+import practice.chat.dispatcher.ApplicationDispatcher;
 
 
 /**
@@ -11,16 +10,14 @@ import practice.chat.controller.SceneDispatcher;
  */
 public class MainApp extends Application {
 
-    public static Client client;
-
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage stage) {
-        SceneDispatcher sceneDispatcher = new SceneDispatcher(stage);
-        Runtime.getRuntime().addShutdownHook(new Thread(sceneDispatcher::closeApp));
-        sceneDispatcher.switchToLogin();
+        ApplicationDispatcher applicationDispatcher = new ApplicationDispatcher(stage);
+        Runtime.getRuntime().addShutdownHook(new Thread(applicationDispatcher::closeApplication));
+        applicationDispatcher.switchToLogin();
     }
 }

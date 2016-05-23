@@ -23,5 +23,6 @@
     <Label font="$x1" layoutX="163.0" layoutY="149.0" text="IP address:" />
     <TextField fx:id="ipAddressField" layoutX="161.0" layoutY="165.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="127.0.0.1" />
     <TextField fx:id="portField" layoutX="163.0" layoutY="207.0" prefHeight="21.0" prefWidth="125.0" promptText="" text="1234" />
+    <Label fx:id="message" alignment="CENTER" font="$x1" layoutX="118.0" layoutY="294.0" prefWidth="211.0" text="" textFill="#ff007a" />
   </children>
 </AnchorPane>

@@ -1,13 +1,14 @@
-package practice.chat.controller;
+package practice.chat.dispatcher;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import practice.chat.backend.Client;
 import practice.chat.controller.ChatController;
 import practice.chat.controller.LoginController;
-import practice.chat.main.MainApp;
+import practice.chat.utils.ResourceCloser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,17 +16,19 @@ import java.io.InputStream;
 /**
  * Created by misha on 12.05.16.
  */
-public class SceneDispatcher {
+public class ApplicationDispatcher {
+
+    public Client client;
 
     private Stage stage;
     private ChatController chatController;
     private LoginController loginController;
 
-    public SceneDispatcher(Stage stage) { //TODO how to move on center
+    public ApplicationDispatcher(Stage stage) { //TODO how to move on center
         this.stage = stage;
         this.stage.setTitle("Chat application");
         this.stage.show();
-        this.stage.setOnCloseRequest(e -> closeApp());
+        this.stage.setOnCloseRequest(e -> closeApplication());
     }
 
     public void switchToLogin() {
@@ -36,10 +39,10 @@ public class SceneDispatcher {
             stream = getClass().getResourceAsStream(fxmlFile);
             Parent root = loader.load(stream);
             loginController = loader.getController();
-            loginController.setSceneDispatcher(this);
+            loginController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
         } catch (IOException ex) {//TODO logger
-            closeQuietly(stream);
+            ResourceCloser.closeQuietly(stream);
             ex.printStackTrace();
         }
     }
@@ -52,37 +55,24 @@ public class SceneDispatcher {
             stream = getClass().getResourceAsStream(fxmlFile);
             Parent root = loader.load(stream);
             chatController = loader.getController();
-            chatController.setSceneDispatcher(this);
+            chatController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
         } catch (IOException ex) {//TODO logger
-            closeQuietly(stream);
+            ResourceCloser.closeQuietly(stream);
             ex.printStackTrace();
         }
     }
 
-    private void closeQuietly(InputStream stream) {
-        if (stream != null) {
-            try {
-                stream.close();
-            } catch (IOException e) { //TODO logger
-                e.printStackTrace();
-            }
-        }
-    }
 
-    public void closeApp() {
+    public void closeApplication() {
         Platform.exit();
-        if (MainApp.client != null) {
-            MainApp.client.close();
+        if (client != null) {
+            client.close();
         }
     }
 
     public void injectLoginLabel(String login) {
         chatController.login.setText(login);
-    }
-
-    public LoginController getLoginController() {
-        return loginController;
     }
 
     public ChatController getChatController() {

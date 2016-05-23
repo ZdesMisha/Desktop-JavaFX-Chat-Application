@@ -17,15 +17,17 @@ import java.util.*;
  */
 public class Room {
 
+    public static final int FILE_SIZE = 100;
+    public static final int HISTORY_SIZE = 10;
     private Chat chat;
     private boolean isMainRoom;
     private static int roomCounter = 1;
     private String name;
     private HistoryWriter historyManager = HistoryWriter.getInstance();
 
+    private final List<Client> users = new ArrayList<>();
     private final List<Message> history = new ArrayList<>();
     private final Queue<Message> recentMessages = new LinkedList<>();
-    private final List<Client> users = new ArrayList<>();
 
 
     public Room(Chat chat) {
@@ -72,7 +74,7 @@ public class Room {
             users.add(client);
         }
         client.setRoom(this);
-        TextMessage loginMessage = new NewUser(client.getLogin(),new Date());
+        NewUser loginMessage = new NewUser(client.getLogin(), new Date());
         saveMessageInQueue(loginMessage);
         broadcastMessage(loginMessage);
         broadcastMessage(new UserList(prepareUserList()));
@@ -83,7 +85,7 @@ public class Room {
         synchronized (users) {
             users.remove(client);
         }
-        TextMessage logoutMessage = new UserLeft(client.getLogin(),new Date());
+        UserLeft logoutMessage = new UserLeft(client.getLogin(), new Date());
         saveMessageInQueue(logoutMessage);
         broadcastMessage(logoutMessage);
         broadcastMessage(new UserList(prepareUserList()));
@@ -99,15 +101,13 @@ public class Room {
         return userList;
     }
 
-    public void saveMessageInQueue(TextMessage message) {
-        synchronized (recentMessages) {
-            recentMessages.offer(message);
-            if (recentMessages.size() >= 10) {
-                history.add(recentMessages.poll());
-            }
-            if (history.size() >= 20) {
-                saveHistory();
-            }
+    public synchronized void saveMessageInQueue(TextMessage message) {
+        recentMessages.offer(message);
+        if (recentMessages.size() >= HISTORY_SIZE) {
+            history.add(recentMessages.poll());
+        }
+        if (history.size() >= FILE_SIZE) {
+            saveHistory();
         }
     }
 
@@ -129,7 +129,6 @@ public class Room {
 
     public void closeClientConnections() {
         saveHistory();
-        System.out.println(this.getName());
         synchronized (users) {
             users.forEach(Client::closeConnection);
         }

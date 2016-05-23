@@ -7,6 +7,8 @@ import practice.chat.protocol.shared.message.request.Login;
 import practice.chat.protocol.shared.message.response.info.CurrentRoom;
 import practice.chat.protocol.shared.message.response.info.RoomList;
 import practice.chat.protocol.shared.message.response.info.UserList;
+import practice.chat.protocol.shared.message.response.info.ViolatedLoginUniqueConstraint;
+import practice.chat.utils.ResourceCloser;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -19,7 +21,6 @@ public class Client extends Thread {
     private String ip;
     private short port;
     private Socket socket;
-    private boolean running;
     private ObjectOutputStream output;
     private ObjectInputStream input;
     private ChatController chatController;
@@ -33,17 +34,9 @@ public class Client extends Thread {
     }
 
     public void close() { //TODO logger
-        try {
-            if (output != null) {
-                output.close();
-            } else if (input != null) {
-                input.close();
-            } else if (socket != null) {
-                socket.close();
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+        ResourceCloser.closeQuietly(output);
+        ResourceCloser.closeQuietly(input);
+        ResourceCloser.closeQuietly(socket);
     }
 
     public void establishConnection() throws Exception {
@@ -61,7 +54,6 @@ public class Client extends Thread {
     }
 
     public void run() {
-        running=true;
         Message message;
         try {
             output = new ObjectOutputStream(socket.getOutputStream());
@@ -69,7 +61,7 @@ public class Client extends Thread {
 
             sendMessage(new Login(login));
 
-            while (running) {
+            while (true) {
                 message = (Message) input.readObject();
                 processMessage(message);
             }
@@ -80,26 +72,25 @@ public class Client extends Thread {
             close(); //TODO how to avoid it?
         }
     }
-
-    public void shutdown(){
-        running=false;
-        close();
-    }
-
     private void processMessage(Message message) {
+        System.out.println(message);
 
-        if (message instanceof UserList) {
+        if (message instanceof ViolatedLoginUniqueConstraint) {
 
-            chatController.updateUserList(((UserList) message).getUserList());
+            close(); //TODO notify client about error message
+
+        } else if (message instanceof UserList) {
+
+            Platform.runLater(() ->chatController.updateUserList(((UserList) message).getUserList()));
 
         } else if (message instanceof RoomList) {
 
-            chatController.updateRoomList(((RoomList) message).getRoomList());
+            Platform.runLater(() ->chatController.updateRoomList(((RoomList) message).getRoomList()));
 
         } else if (message instanceof CurrentRoom) {
 
             String room = ((CurrentRoom) message).getRoomName();
-            chatController.updateRoom(room);
+            Platform.runLater(() ->chatController.updateRoom(room));
 
         } else if (message instanceof TextMessage) {
 
