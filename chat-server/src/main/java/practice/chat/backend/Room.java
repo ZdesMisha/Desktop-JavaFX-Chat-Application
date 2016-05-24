@@ -20,10 +20,9 @@ import java.util.stream.Collectors;
 public class Room {
 
     public static final int FILE_SIZE = 100;
-    public static final int HISTORY_SIZE = 10;
+    public static final int RECENT_HISTORY_SIZE = 10;
     private Chat chat;
     private boolean isMainRoom;
-    private static int roomCounter = 1; //TODO volatile?
     private String name;
     private HistoryWriter historyManager = HistoryWriter.getInstance();
 
@@ -32,8 +31,8 @@ public class Room {
     private final Queue<Message> recentMessages = new LinkedList<>();
 
 
-    public Room(Chat chat) {
-        name = "Room_" + roomCounter++;
+    public Room(int roomNumber, Chat chat) {
+        name = "Room_" + roomNumber;
         this.chat = chat;
         isMainRoom = false;
     }
@@ -42,11 +41,6 @@ public class Room {
         this.name = name;
         this.chat = chat;
         isMainRoom = true;
-    }
-
-    @Override
-    public String toString() {
-        return name + " with users: " + users;
     }
 
     public void broadcastMessage(Message message) {
@@ -91,7 +85,7 @@ public class Room {
 
     public synchronized void saveMessageInQueue(TextMessage message) {
         recentMessages.offer(message);
-        if (recentMessages.size() >= HISTORY_SIZE) {
+        if (recentMessages.size() >= RECENT_HISTORY_SIZE) {
             history.add(recentMessages.poll());
         }
         if (history.size() >= FILE_SIZE) {
@@ -99,13 +93,13 @@ public class Room {
         }
     }
 
-    public synchronized void saveHistory() {
+    public synchronized void saveHistory() {//TODO ?
         history.addAll(recentMessages);
         historyManager.writeHistory(history, this.getName());
         history.clear();
     }
 
-    private synchronized void sendRecentMessages(Client client) {
+    private synchronized void sendRecentMessages(Client client) { //TODO ?
         recentMessages.forEach(client::sendMessage);
     }
 
@@ -116,21 +110,5 @@ public class Room {
     public void closeClientConnections() {
         saveHistory();
         users.forEach(Client::closeConnection);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Room room = (Room) o;
-
-        return name != null ? name.equals(room.name) : room.name == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        return name != null ? name.hashCode() : 0;
     }
 }

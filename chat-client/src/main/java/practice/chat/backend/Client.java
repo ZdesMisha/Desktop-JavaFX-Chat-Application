@@ -8,7 +8,7 @@ import practice.chat.protocol.shared.message.response.info.CurrentRoom;
 import practice.chat.protocol.shared.message.response.info.RoomList;
 import practice.chat.protocol.shared.message.response.info.UserList;
 import practice.chat.protocol.shared.message.response.info.ViolatedLoginUniqueConstraint;
-import practice.chat.utils.ResourceCloser;
+import practice.chat.utils.IOUtils;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -34,9 +34,9 @@ public class Client extends Thread {
     }
 
     public void close() { //TODO logger
-        ResourceCloser.closeQuietly(output);
-        ResourceCloser.closeQuietly(input);
-        ResourceCloser.closeQuietly(socket);
+        IOUtils.closeQuietly(output);
+        IOUtils.closeQuietly(input);
+        IOUtils.closeQuietly(socket);
     }
 
     public void establishConnection() throws Exception {

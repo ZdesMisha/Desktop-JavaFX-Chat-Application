@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 import practice.chat.backend.Server;
 import practice.chat.controller.HistoryWindowController;
 import practice.chat.controller.ServerController;
-import practice.chat.utils.ResourceCloser;
+import practice.chat.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ public class ApplicationDispatcher {
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException ex) {
-            ResourceCloser.closeQuietly(stream);
+            IOUtils.closeQuietly(stream);
             ex.printStackTrace();
         }
     }
@@ -63,7 +63,7 @@ public class ApplicationDispatcher {
             historyWindowController.setRoomLable(roomName);
             historyWindowController.showHistory();
         } catch (IOException ex) {
-            ResourceCloser.closeQuietly(stream);
+            IOUtils.closeQuietly(stream);
             ex.printStackTrace();
         }
 

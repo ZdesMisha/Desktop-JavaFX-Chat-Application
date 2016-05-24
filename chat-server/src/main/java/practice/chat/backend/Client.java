@@ -4,9 +4,8 @@ import practice.chat.protocol.shared.message.*;
 import practice.chat.protocol.shared.message.request.ChangeRoom;
 import practice.chat.protocol.shared.message.request.CreateRoom;
 import practice.chat.protocol.shared.message.request.Login;
-import practice.chat.protocol.shared.message.request.Logout;
 import practice.chat.protocol.shared.message.response.info.ViolatedLoginUniqueConstraint;
-import practice.chat.utils.ResourceCloser;
+import practice.chat.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -54,7 +53,7 @@ public class Client extends Thread {
         if (message instanceof ChangeRoom) {
 
             String room = ((ChangeRoom) message).getRoom();
-            chat.changeRoom(this, chat.rooms.get(room));
+            chat.changeRoom(this, room);
 
         } else if (message instanceof Login) {
 
@@ -74,19 +73,15 @@ public class Client extends Thread {
         }
     }
 
-    public void HowToNameThisMethod(){
-        sendMessage(new ViolatedLoginUniqueConstraint(login));
+    public synchronized void closeConnection() { //TODO logger
+        IOUtils.closeQuietly(output);
+        IOUtils.closeQuietly(input);
+        IOUtils.closeQuietly(socket);
     }
 
-    public void closeConnection() { //TODO logger
-        ResourceCloser.closeQuietly(output);
-        ResourceCloser.closeQuietly(input);
-        ResourceCloser.closeQuietly(socket);
-    }
-
-    public void sendMessage(Message message) {
+    public synchronized void sendMessage(Message message) {//tODO check output thread safety
         try {
-                output.writeObject(message);
+            output.writeObject(message);
         } catch (IOException e) {
             e.printStackTrace(); //TODO logger
         }

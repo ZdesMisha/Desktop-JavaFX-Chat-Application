@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 import practice.chat.backend.Client;
 import practice.chat.controller.ChatController;
 import practice.chat.controller.LoginController;
-import practice.chat.utils.ResourceCloser;
+import practice.chat.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ public class ApplicationDispatcher {
             loginController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
         } catch (IOException ex) {//TODO logger
-            ResourceCloser.closeQuietly(stream);
+            IOUtils.closeQuietly(stream);
             ex.printStackTrace();
         }
     }
@@ -58,7 +58,7 @@ public class ApplicationDispatcher {
             chatController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
         } catch (IOException ex) {//TODO logger
-            ResourceCloser.closeQuietly(stream);
+            IOUtils.closeQuietly(stream);
             ex.printStackTrace();
         }
     }

@@ -1,7 +1,7 @@
 package practice.chat.history;
 
 import practice.chat.protocol.shared.message.Message;
-import practice.chat.utils.ResourceCloser;
+import practice.chat.utils.IOUtils;
 
 import java.io.*;
 import java.util.*;
@@ -34,7 +34,7 @@ public class HistoryWriter {
         } catch (Exception ex) { //TODO add logger
             ex.printStackTrace();
         } finally {
-            ResourceCloser.closeQuietly(output);
+            IOUtils.closeQuietly(output);
         }
     }
 }
