@@ -15,7 +15,7 @@
       </font>
     </Button>
     <Button fx:id="previousButton" font="$x1" layoutX="108.0" layoutY="468.0" mnemonicParsing="false" onAction="#handlePreviousButton" prefWidth="83.0" text="Previous" />
-    <Label fx:id="roomName" layoutX="28.0" layoutY="21.0" prefWidth="160.0" text="">
+    <Label fx:id="fileName" layoutX="28.0" layoutY="21.0" prefWidth="160.0" text="">
       <font>
         <Font name="System Bold" size="11.0" fx:id="x2" />
       </font>

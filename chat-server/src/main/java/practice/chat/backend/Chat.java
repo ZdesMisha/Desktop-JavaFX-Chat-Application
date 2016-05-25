@@ -1,9 +1,10 @@
 package practice.chat.backend;
 
-import practice.chat.protocol.shared.message.Message;
-import practice.chat.protocol.shared.message.response.info.RoomList;
-import practice.chat.protocol.shared.message.response.info.ViolatedLoginUniqueConstraint;
-import practice.chat.protocol.shared.message.response.text.RoomClosed;
+import practice.chat.protocol.shared.messages.Message;
+import practice.chat.protocol.shared.messages.response.info.RoomList;
+import practice.chat.protocol.shared.messages.response.info.ViolatedLoginUniqueConstraint;
+import practice.chat.protocol.shared.messages.response.text.RoomClosed;
+import practice.chat.protocol.shared.messages.response.text.RoomCreated;
 
 import java.net.Socket;
 import java.util.*;
@@ -13,38 +14,43 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by misha on 06.05.16.
  */
-public class Chat {
+public final class Chat {
 
     private static volatile Chat chat;
+    private Server server;
     private AtomicInteger roomCounter = new AtomicInteger(0);
     private final Map<String, Room> rooms = new ConcurrentHashMap<>();
     private final Set<String> chatUsers = ConcurrentHashMap.newKeySet();
 
-    public Chat() {
+    private Chat(Server server) {
+        this.server = server;
         rooms.put("MainRoom", new Room("MainRoom", this));
     }
 
-    public static Chat getInstance() {
+    static Chat initInstance(Server server) {
         if (chat == null) {
             synchronized (Chat.class) {
                 if (chat == null) {
-                    chat = new Chat();
+                    chat = new Chat(server);
                 }
             }
         }
         return chat;
     }
 
-    private Room getNewRoom() {
-        return new Room(roomCounter.incrementAndGet(), chat);
+    static Chat getInstance(){
+        if (chat == null) {
+            throw new IllegalStateException("Chat is not initialized");
+        }
+        return chat;
     }
 
-    public void addUserToChat(Socket socket) {
+    void addUserToChat(Socket socket) {
         Client client = new Client(socket);
         client.start();
     }
 
-    public void addToMainRoom(Client client) {
+    void addToMainRoom(Client client) {
         String login = client.getLogin();
         if (chatUsers.add(login)) {
             rooms.get("MainRoom").addUser(client);
@@ -53,7 +59,8 @@ public class Chat {
         }
     }
 
-    public void removeUserFromChat(Client client) { //TODO synch ??
+    void removeUserFromChat(Client client) {
+        server.decreaseConnectionsCounter(client.getLogin());
         chatUsers.remove(client.getName());
         Room currentRoom = client.getRoom();
         currentRoom.removeUser(client);
@@ -64,14 +71,19 @@ public class Chat {
         }
     }
 
-    public void createNewRoom(Client client) {
-        Room newRoom = getNewRoom();
+    void createNewRoom(Client client) {
+        Room newRoom = new Room(roomCounter.incrementAndGet(), chat);
         rooms.put(newRoom.getName(), newRoom);
         changeRoom(client, newRoom.getName());
+
+        RoomCreated roomCreatedMessage = new RoomCreated(client.getLogin(), newRoom.getName(), new Date()); //TODO synch?
+        rooms.values().forEach(r -> r.saveMessageInQueue(roomCreatedMessage));
+        broadcastChatMessage(roomCreatedMessage);
+
         broadcastChatMessage(new RoomList(prepareRoomList()));
     }
 
-    public void changeRoom(Client client, String room) {
+    void changeRoom(Client client, String room) {
         Room oldRoom;
         Room newRoom = rooms.get(room);
         oldRoom = client.getRoom();
@@ -96,18 +108,18 @@ public class Chat {
         rooms.values().forEach(r -> r.saveMessageInQueue(roomClosedMessage));
         broadcastChatMessage(roomClosedMessage);
         broadcastChatMessage(new RoomList(prepareRoomList()));
-        room.saveHistory();
+        room.flushHistory();
     }
 
-    public void broadcastChatMessage(Message message) {
+    private void broadcastChatMessage(Message message) {
         rooms.values().forEach(r -> r.broadcastMessage(message));
     }
 
-    public List<String> prepareRoomList() {
+    List<String> prepareRoomList() {
         return new ArrayList<>(rooms.keySet());
     }
 
-    public void stop() {
+    void stop() {
         rooms.values().forEach(Room::closeClientConnections);
     }
 }

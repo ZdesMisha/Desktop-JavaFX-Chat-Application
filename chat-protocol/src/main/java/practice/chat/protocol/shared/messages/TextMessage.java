@@ -1,4 +1,4 @@
-package practice.chat.protocol.shared.message;
+package practice.chat.protocol.shared.messages;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,7 +7,8 @@ import java.util.Date;
  * Created by misha on 20.05.16.
  */
 public class TextMessage implements Message {
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
+
+    private static final String DATE_FORMAT = "HH:mm:ss dd/MM/yyyy";
 
     protected String login;
     protected String message;
@@ -38,7 +39,7 @@ public class TextMessage implements Message {
     }
 
     public void setDate(Date date) {
-        this.date = DATE_FORMAT.format(date);
+        this.date = new SimpleDateFormat(DATE_FORMAT).format(date);
     }
 
     @Override

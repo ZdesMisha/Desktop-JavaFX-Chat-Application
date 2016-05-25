@@ -1,6 +1,6 @@
-package practice.chat.protocol.shared.message.response.info;
+package practice.chat.protocol.shared.messages.response.info;
 
-import practice.chat.protocol.shared.message.Message;
+import practice.chat.protocol.shared.messages.Message;
 
 /**
  * Created by misha on 23.05.16.

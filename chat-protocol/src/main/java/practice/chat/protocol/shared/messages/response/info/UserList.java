@@ -1,8 +1,7 @@
-package practice.chat.protocol.shared.message.response.info;
+package practice.chat.protocol.shared.messages.response.info;
 
-import practice.chat.protocol.shared.message.Message;
+import practice.chat.protocol.shared.messages.Message;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

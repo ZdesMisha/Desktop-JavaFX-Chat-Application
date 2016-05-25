@@ -1,16 +1,14 @@
-package practice.chat.protocol.shared.message.request;
+package practice.chat.protocol.shared.messages.request;
 
-import practice.chat.protocol.shared.message.Message;
+import practice.chat.protocol.shared.messages.Message;
 
 /**
  * Created by misha on 20.05.16.
  */
-public class Login implements Message {
-
-
+public class Logout implements Message {
     String login;
 
-    public Login(String login) {
+    public Logout(String login) {
         this.login = login;
     }
 

@@ -1,6 +1,8 @@
 package practice.chat.history;
 
-import practice.chat.protocol.shared.message.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import practice.chat.protocol.shared.messages.Message;
 import practice.chat.utils.IOUtils;
 
 import java.io.*;
@@ -11,28 +13,27 @@ import java.util.*;
  */
 public class HistoryWriter {
 
-    private final String HOME_DIR = System.getProperty("user.home");
-    private final String HISTORY_DIR_NAME = "ChatHistory";
-    private final String HISTORY_PATH = HOME_DIR + File.separator + HISTORY_DIR_NAME;
+    private final static String HOME_DIR = System.getProperty("user.home");
+    private final static String HISTORY_DIR_NAME = "ChatHistory";
+    private final static String HISTORY_PATH = HOME_DIR + File.separator + HISTORY_DIR_NAME;
 
-    public static HistoryWriter getInstance() {
-        return new HistoryWriter();
-    }
+    private final static Logger LOG = LoggerFactory.getLogger(HistoryWriter.class);
 
-    public void writeHistory(List<Message> history, String room) { //TODO may be it would be better to implement using NIO?
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static void writeHistory(Collection<Message> history, String fileName) {
         File dir = new File(HISTORY_PATH);
-        File roomFile = new File(HISTORY_PATH + File.separator + room);
+        File roomFile = new File(HISTORY_PATH + File.separator + fileName+".txt");
         BufferedWriter output = null;
         try {
-            dir.mkdir(); // TODO check result
-            roomFile.createNewFile(); // TODO check result
-
-            output = new BufferedWriter(new FileWriter(roomFile, true));
+            dir.mkdir();
+            roomFile.createNewFile();
+            output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(roomFile, true),"UTF-8"));
             for (Message message : history) {
                 output.write(message + "\n");
             }
-        } catch (Exception ex) { //TODO add logger
-            ex.printStackTrace();
+        } catch (IOException ex) {
+            LOG.error("Unable to write history to file");
+            LOG.error("Error stack:\n" + ex);
         } finally {
             IOUtils.closeQuietly(output);
         }

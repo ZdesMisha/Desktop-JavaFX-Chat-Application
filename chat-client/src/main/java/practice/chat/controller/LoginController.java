@@ -2,6 +2,8 @@ package practice.chat.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import practice.chat.backend.Client;
 import practice.chat.dispatcher.ApplicationDispatcher;
 
@@ -25,6 +27,8 @@ public class LoginController {
                     "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
     private static final String PORT_VALID_PATTERN = "\\d+";
 
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
+
     @FXML
     private TextField loginField;
     @FXML
@@ -42,6 +46,7 @@ public class LoginController {
             .getControlNewText().matches(IP_ADDRESS_FORMAT_PATTERN) ? c : null);
     private TextFormatter<String> portFieldFormatter = new TextFormatter<>(c -> c
             .getControlNewText().matches(PORT_FORMAT_PATTERN) ? c : null);
+
 
 
     @FXML
@@ -73,11 +78,12 @@ public class LoginController {
                 applicationDispatcher.client.start();
             } catch (Exception ex) {
                 applicationDispatcher.switchToLogin();
-                showAlertBox("Can not establish connection to server\n" +
+                showAlertBox("Can not establish connection with server\n" +
                         "Possible reasons:\n" +
                         "* Server is offline\n" +
                         "* Wrong server address");
-                ex.printStackTrace(); //TODO logger
+                LOG.error("Can not establish connection with server");
+                LOG.error("Error stack:\n" + ex);
             }
         }
     }
@@ -86,16 +92,16 @@ public class LoginController {
         return login.matches("[a-zA-Z0-9]{2,20}");
     }
 
-    private boolean isValidPort(String ip) {
-        if (!ip.matches(PORT_VALID_PATTERN)) {
+    private boolean isValidPort(String port) {
+        if (!port.matches(PORT_VALID_PATTERN)) {
             return false;
         }
-        int ipAddress = Integer.parseInt(ip);
-        return ipAddress > 1024 && ipAddress < 65536;
+        int parsedPort = Integer.parseInt(port);
+        return parsedPort > 1024 && parsedPort < 65536;
     }
 
-    private boolean isValidIp(String port) {
-        return port.matches(IP_ADDRESS_VALID_PATTERN);
+    private boolean isValidIp(String ip) {
+        return ip.matches(IP_ADDRESS_VALID_PATTERN);
     }
 
     private void showAlertBox(String message) {

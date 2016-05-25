@@ -1,4 +1,4 @@
-package practice.chat.protocol.shared.message;
+package practice.chat.protocol.shared.messages;
 
 import java.io.Serializable;
 

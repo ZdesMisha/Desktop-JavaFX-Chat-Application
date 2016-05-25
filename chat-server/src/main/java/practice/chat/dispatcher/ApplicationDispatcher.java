@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import practice.chat.backend.Server;
 import practice.chat.controller.HistoryWindowController;
 import practice.chat.controller.ServerController;
@@ -23,6 +25,8 @@ public class ApplicationDispatcher {
     private Stage stage;
     private HistoryWindowController historyWindowController;
     private ServerController serverController;
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationDispatcher.class);
+
 
     public ApplicationDispatcher(Stage stage) {
         this.stage = stage;
@@ -43,12 +47,14 @@ public class ApplicationDispatcher {
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException ex) {
+            LOG.error("Unable to create server main window scene\n");
+            LOG.error("Error stack:\n" + ex);
+        } finally {
             IOUtils.closeQuietly(stream);
-            ex.printStackTrace();
         }
     }
 
-    public void openHistoryWindow(String roomName) {
+    public void openHistoryWindow(String fileName) {
         InputStream stream = null;
         try {
             String fxmlFile = "/fxml/historyScene.fxml";
@@ -59,12 +65,13 @@ public class ApplicationDispatcher {
             window.setScene(new Scene(root));
             window.show();
             historyWindowController = loader.getController();
-            historyWindowController.setApplicationDispatcher(this);
-            historyWindowController.setRoomLable(roomName);
+            historyWindowController.setRoomLabel(fileName);
             historyWindowController.showHistory();
         } catch (IOException ex) {
+            LOG.error("Unable to open history window\n");
+            LOG.error("Error stack:\n" + ex);
+        } finally {
             IOUtils.closeQuietly(stream);
-            ex.printStackTrace();
         }
 
     }
@@ -78,6 +85,10 @@ public class ApplicationDispatcher {
 
     public ServerController getServerController() {
         return serverController;
+    }
+
+    public HistoryWindowController getHistoryWindowController() {
+        return historyWindowController;
     }
 
 }

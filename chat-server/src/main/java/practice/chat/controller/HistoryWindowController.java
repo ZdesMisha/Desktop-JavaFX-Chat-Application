@@ -11,13 +11,15 @@ import practice.chat.history.HistoryReader;
 import java.util.List;
 import java.util.Optional;
 
+import static practice.chat.history.HistoryReader.readHistory;
+
 /**
  * Created by misha on 18.05.16.
  */
 public class HistoryWindowController {
 
     @FXML
-    public Label roomName;
+    public Label fileName;
 
     @FXML
     public Button nextButton;
@@ -29,14 +31,6 @@ public class HistoryWindowController {
     private TextArea textArea;
 
     private int page = 1;
-
-    private ApplicationDispatcher applicationDispatcher;
-
-    private HistoryReader historyReader = HistoryReader.getInstance();
-
-    public void setApplicationDispatcher(ApplicationDispatcher applicationDispatcher) {
-        this.applicationDispatcher = applicationDispatcher;
-    }
 
     @FXML
     public void initialize() {
@@ -61,7 +55,7 @@ public class HistoryWindowController {
 
     public void showHistory() {
         textArea.clear();
-        Optional<List<String>> history = historyReader.readHistory(roomName.getText(), page); //TODO to read about optional
+        Optional<List<String>> history = readHistory(fileName.getText(), page); //TODO to read about optional
         if (history.isPresent()) {
             if (history.get().isEmpty()) {
                 nextButton.setDisable(true);
@@ -71,7 +65,7 @@ public class HistoryWindowController {
                 }
             }
         } else {
-            showAlertBox("File does not exist");
+            showAlertBox("File is not exist");
         }
     }
     private void showAlertBox(String message) {
@@ -80,8 +74,8 @@ public class HistoryWindowController {
         alert.show();
     }
 
-    public void setRoomLable(String name){
-        roomName.setText(name);
+    public void setRoomLabel(String name){
+        fileName.setText(name);
     }
 
 }

@@ -9,12 +9,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import practice.chat.dispatcher.ApplicationDispatcher;
-import practice.chat.protocol.shared.message.TextMessage;
-import practice.chat.protocol.shared.message.common.SimpleTextMessage;
-import practice.chat.protocol.shared.message.request.ChangeRoom;
-import practice.chat.protocol.shared.message.request.CreateRoom;
-import practice.chat.protocol.shared.message.response.text.NewUser;
-import practice.chat.protocol.shared.message.response.text.UserLeft;
+import practice.chat.protocol.shared.messages.TextMessage;
+import practice.chat.protocol.shared.messages.common.SimpleTextMessage;
+import practice.chat.protocol.shared.messages.request.ChangeRoom;
+import practice.chat.protocol.shared.messages.request.CreateRoom;
+import practice.chat.protocol.shared.messages.response.text.NewUser;
+import practice.chat.protocol.shared.messages.response.text.UserLeft;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class ChatController {
     private TextFormatter<String> textLengthFormatter = new TextFormatter<>(c -> c
             .getControlNewText().length() > 300 ? null : c);
 
-    private ApplicationDispatcher applicationDispatcher;
+    public ApplicationDispatcher applicationDispatcher;
 
     @FXML
     public void initialize() {
@@ -70,7 +70,7 @@ public class ChatController {
     public void handleChangeRoomButton() {
         String currentRoom = room.getText();
         String roomToJoin = roomChoice.getValue();
-        if(currentRoom.equals(roomToJoin)) {
+        if (currentRoom.equals(roomToJoin)) {
             return;
         }
         userList.clear();
@@ -81,7 +81,6 @@ public class ChatController {
 
     public void handleLogoutButton() {
         applicationDispatcher.client.close();
-
     }
 
     public void handleSendButton() {
@@ -113,38 +112,46 @@ public class ChatController {
         });
     }
 
-    public void onDisconnect() { //TODO add notification about connection failure;
-        applicationDispatcher.switchToLogin();
-        showAlertBox("Disconnected");
-
+    public void onDisconnect() {
+        Platform.runLater(() -> {
+            applicationDispatcher.switchToLogin();
+            showAlertBox("Disconnected");
+        });
     }
 
     public void updateUserList(List<String> users) {
-        userList.clear();
-        for (String user : users) {
-            userList.appendText(user + "\n");
-        }
-        userAmount.setText(users.size() + "");
+        Platform.runLater(() -> {
+            userList.clear();
+            for (String user : users) {
+                userList.appendText(user + "\n");
+            }
+            userAmount.setText("" + users.size());
+        });
     }
 
     public void updateRoomList(List<String> rooms) {
-        roomChoice.getItems().clear();
-        for (String room : rooms) {
-            roomChoice.getItems().add(room);
-        }
-        roomChoice.setValue(room.getText());
+        Platform.runLater(() -> {
+            roomChoice.getItems().clear();
+            for (String room : rooms) {
+                roomChoice.getItems().add(room);
+            }
+            roomChoice.setValue(room.getText());
+        });
+
     }
 
     public void updateRoom(String roomName) {
-        room.setText(roomName);
-        roomChoice.setValue(roomName);
+        Platform.runLater(() -> {
+            room.setText(roomName);
+            roomChoice.setValue(roomName);
+        });
     }
 
     private boolean isValidMessage(String message) {
         return message.matches(".+");
     }
 
-    private void showAlertBox(String message) {
+    public void showAlertBox(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(message);
         alert.show();

@@ -1,10 +1,12 @@
 package practice.chat.backend;
 
-import practice.chat.protocol.shared.message.*;
-import practice.chat.protocol.shared.message.request.ChangeRoom;
-import practice.chat.protocol.shared.message.request.CreateRoom;
-import practice.chat.protocol.shared.message.request.Login;
-import practice.chat.protocol.shared.message.response.info.ViolatedLoginUniqueConstraint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import practice.chat.protocol.shared.messages.Message;
+import practice.chat.protocol.shared.messages.TextMessage;
+import practice.chat.protocol.shared.messages.request.ChangeRoom;
+import practice.chat.protocol.shared.messages.request.CreateRoom;
+import practice.chat.protocol.shared.messages.request.Login;
 import practice.chat.utils.IOUtils;
 
 import java.io.IOException;
@@ -25,7 +27,9 @@ public class Client extends Thread {
     private ObjectOutputStream output;
     private ObjectInputStream input;
 
-    public Client(Socket socket) {
+    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
+
+     Client(Socket socket) {
         this.socket = socket;
         this.chat = Chat.getInstance();
     }
@@ -40,11 +44,12 @@ public class Client extends Thread {
                 message = (Message) input.readObject();
                 processMessage(message);
             }
-        } catch (Exception ex) { //TODO logger
-            ex.printStackTrace();
+        } catch (Exception ex) {
+            LOG.error("Connection failure with host: " + socket);
+            LOG.error("Error stack:\n" + ex);
         } finally {
             chat.removeUserFromChat(this);
-            closeConnection();//TODO logger
+            closeConnection();
         }
     }
 
@@ -73,30 +78,38 @@ public class Client extends Thread {
         }
     }
 
-    public synchronized void closeConnection() { //TODO logger
-        IOUtils.closeQuietly(output);
+    void closeConnection() {
+        synchronized (this) {
+            IOUtils.closeQuietly(output);
+        }
         IOUtils.closeQuietly(input);
         IOUtils.closeQuietly(socket);
     }
 
-    public synchronized void sendMessage(Message message) {//tODO check output thread safety
+    void sendMessage(Message message) {
         try {
-            output.writeObject(message);
-        } catch (IOException e) {
-            e.printStackTrace(); //TODO logger
+            synchronized (this) {
+                output.writeObject(message);
+            }
+        } catch (IOException ex) {
+            LOG.error("Unable to send message " + message);
+            LOG.error("Error stack:\n" + ex);
         }
     }
 
-    public String getLogin() {
+    String getLogin() {
         return login;
     }
 
-    public Room getRoom() {
+    Room getRoom() {
         return room;
     }
 
-    public void setRoom(Room room) {
+    void setRoom(Room room) {
         this.room = room;
+    }
+     Socket getSocket() {
+        return socket;
     }
 
 

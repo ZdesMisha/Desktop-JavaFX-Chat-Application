@@ -17,7 +17,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) {
         ApplicationDispatcher applicationDispatcher = new ApplicationDispatcher(stage);
-        Runtime.getRuntime().addShutdownHook(new Thread(applicationDispatcher::closeApplication));
+        Runtime.getRuntime().addShutdownHook(new Thread(applicationDispatcher::closeApplication)); // TODO does not work
         applicationDispatcher.switchToLogin();
     }
 }

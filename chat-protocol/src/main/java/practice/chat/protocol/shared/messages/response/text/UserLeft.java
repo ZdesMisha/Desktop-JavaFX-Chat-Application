@@ -1,6 +1,6 @@
-package practice.chat.protocol.shared.message.response.text;
+package practice.chat.protocol.shared.messages.response.text;
 
-import practice.chat.protocol.shared.message.TextMessage;
+import practice.chat.protocol.shared.messages.TextMessage;
 
 import java.util.Date;
 

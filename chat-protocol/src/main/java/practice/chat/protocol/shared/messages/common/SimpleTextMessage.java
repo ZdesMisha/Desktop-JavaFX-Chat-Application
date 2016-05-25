@@ -1,6 +1,6 @@
-package practice.chat.protocol.shared.message.common;
+package practice.chat.protocol.shared.messages.common;
 
-import practice.chat.protocol.shared.message.TextMessage;
+import practice.chat.protocol.shared.messages.TextMessage;
 
 /**
  * Created by misha on 20.05.16.

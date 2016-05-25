@@ -1,35 +1,38 @@
 package practice.chat.backend;
 
 
-import practice.chat.history.HistoryWriter;
-import practice.chat.protocol.shared.message.Message;
-import practice.chat.protocol.shared.message.TextMessage;
-import practice.chat.protocol.shared.message.response.info.CurrentRoom;
-import practice.chat.protocol.shared.message.response.info.RoomList;
-import practice.chat.protocol.shared.message.response.info.UserList;
-import practice.chat.protocol.shared.message.response.text.NewUser;
-import practice.chat.protocol.shared.message.response.text.UserLeft;
+import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.Queues;
+import practice.chat.protocol.shared.messages.Message;
+import practice.chat.protocol.shared.messages.TextMessage;
+import practice.chat.protocol.shared.messages.response.info.CurrentRoom;
+import practice.chat.protocol.shared.messages.response.info.RoomList;
+import practice.chat.protocol.shared.messages.response.info.UserList;
+import practice.chat.protocol.shared.messages.response.text.NewUser;
+import practice.chat.protocol.shared.messages.response.text.UserLeft;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+
+import static practice.chat.history.HistoryWriter.writeHistory;
 
 /**
  * Created by misha on 04.05.16.
  */
 public class Room {
 
-    public static final int FILE_SIZE = 100;
-    public static final int RECENT_HISTORY_SIZE = 10;
+    private static final int ENTIRE_HISTORY_SIZE = 100;
+    private static final int RECENT_HISTORY_SIZE = 10;
+
     private Chat chat;
     private boolean isMainRoom;
     private String name;
-    private HistoryWriter historyManager = HistoryWriter.getInstance();
 
     private final List<Client> users = new CopyOnWriteArrayList<>();
-    private final List<Message> history = new ArrayList<>();
-    private final Queue<Message> recentMessages = new LinkedList<>();
-
+    private final AtomicReference<List<Message>> entireHistory = new AtomicReference<>(new CopyOnWriteArrayList<>());
+    private final Queue<Message> recentHistory = Queues.synchronizedQueue(EvictingQueue.create(RECENT_HISTORY_SIZE));
 
     public Room(int roomNumber, Chat chat) {
         name = "Room_" + roomNumber;
@@ -43,22 +46,21 @@ public class Room {
         isMainRoom = true;
     }
 
-    public void broadcastMessage(Message message) {
+    void broadcastMessage(Message message) {
         for (Client client : users) {
             client.sendMessage(message);
         }
     }
 
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return users.isEmpty();
     }
 
-    public boolean isMainRoom() {
+    boolean isMainRoom() {
         return isMainRoom;
     }
 
-
-    public void addUser(Client client) {
+    void addUser(Client client) {
         sendRecentMessages(client);
         client.sendMessage(new CurrentRoom(this.getName()));
         client.sendMessage(new RoomList(chat.prepareRoomList()));
@@ -70,8 +72,7 @@ public class Room {
         broadcastMessage(new UserList(prepareUserList()));
     }
 
-
-    public void removeUser(Client client) {
+    void removeUser(Client client) {
         users.remove(client);
         UserLeft logoutMessage = new UserLeft(client.getLogin(), new Date());
         saveMessageInQueue(logoutMessage);
@@ -83,32 +84,29 @@ public class Room {
         return users.stream().map(Client::getLogin).collect(Collectors.toList());
     }
 
-    public synchronized void saveMessageInQueue(TextMessage message) {
-        recentMessages.offer(message);
-        if (recentMessages.size() >= RECENT_HISTORY_SIZE) {
-            history.add(recentMessages.poll());
-        }
-        if (history.size() >= FILE_SIZE) {
-            saveHistory();
+    void saveMessageInQueue(TextMessage message) {
+        recentHistory.add(message);
+        entireHistory.get().add(message);
+        if (entireHistory.get().size() >= ENTIRE_HISTORY_SIZE) {
+            flushHistory();
         }
     }
 
-    public synchronized void saveHistory() {//TODO ?
-        history.addAll(recentMessages);
-        historyManager.writeHistory(history, this.getName());
-        history.clear();
+    void flushHistory() {
+        List<Message> history = entireHistory.getAndSet(new CopyOnWriteArrayList<>());
+        writeHistory(history, this.getName());
     }
 
-    private synchronized void sendRecentMessages(Client client) { //TODO ?
-        recentMessages.forEach(client::sendMessage);
+    private void sendRecentMessages(Client client) {
+        recentHistory.forEach(client::sendMessage);
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void closeClientConnections() {
-        saveHistory();
+    void closeClientConnections() {
         users.forEach(Client::closeConnection);
+        flushHistory();
     }
 }

@@ -1,51 +1,66 @@
 package practice.chat.backend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import practice.chat.controller.ServerController;
+import practice.chat.utils.IOUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by misha on 04.05.16.
  */
 public class Server extends Thread {
 
-    private static final int PORT = 1234; //TODO move to config
-    private boolean running = false;
+    private AtomicInteger connectionCounter = new AtomicInteger(0);
+    private final int port;
     private Chat chat;
     private ServerSocket serverSocket;
-    public ServerController serverController;
+    private ServerController serverController;
+    private static final Logger LOG = LoggerFactory.getLogger(Server.class);
 
-    public Server(ServerController controller) {
+    public Server(int port, ServerController controller) {
+        this.port = port;
         serverController = controller;
     }
 
+    public void initServerSocket() throws IOException {
+        serverSocket = new ServerSocket(port);
+    }
+
     public void run() {
-        running = true;
+        chat = Chat.initInstance(this);
         try {
-            serverSocket = new ServerSocket(PORT);
-            chat = Chat.getInstance();
-            serverController.displayMessage("Server started successfully");
-            while (running) {
+            while (true) {
                 Socket clientSocket = serverSocket.accept();
-                serverController.displayMessage("New client connected, socket: " + clientSocket);
+                connectionCounter.incrementAndGet();
+                serverController.displayMessage("Socket connected: " + clientSocket);
                 chat.addUserToChat(clientSocket);
+                serverController.updateConnectionsAmountLabel(connectionCounter.get());
             }
-        } catch (Exception ex) { //TODO  logger
-            ex.printStackTrace();
+        } catch (IOException ex) {
+            LOG.error("Error stack:\n" + ex);
+            serverController.onServerFailure();
         } finally {
             chat.stop();
         }
     }
 
-    public void shutdown() { //TODO  logger
-        running = false;
-        try {
-            serverSocket.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    public void shutdown() {
+        serverController.displayMessage("Stopping server...");
+        IOUtils.closeQuietly(serverSocket);
+    }
+
+    public void emergencyShutdown() { //TODO test
+        chat.stop();
+    }
+
+    void decreaseConnectionsCounter(String disconnectedClient) {
+        serverController.updateConnectionsAmountLabel(connectionCounter.decrementAndGet());
+        serverController.displayMessage("Socket closed for: " + disconnectedClient);
     }
 
 }

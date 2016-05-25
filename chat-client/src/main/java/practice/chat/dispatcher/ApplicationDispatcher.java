@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import practice.chat.backend.Client;
 import practice.chat.controller.ChatController;
 import practice.chat.controller.LoginController;
@@ -24,6 +26,9 @@ public class ApplicationDispatcher {
     private ChatController chatController;
     private LoginController loginController;
 
+    private static final Logger LOG = LoggerFactory.getLogger(ApplicationDispatcher.class);
+
+
     public ApplicationDispatcher(Stage stage) { //TODO how to move on center
         this.stage = stage;
         this.stage.setTitle("Chat application");
@@ -41,9 +46,10 @@ public class ApplicationDispatcher {
             loginController = loader.getController();
             loginController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
-        } catch (IOException ex) {//TODO logger
+        } catch (IOException ex) {
+            LOG.error("Failure during switching to Login scene");
+            LOG.error("Error stack:\n" + ex);
             IOUtils.closeQuietly(stream);
-            ex.printStackTrace();
         }
     }
 
@@ -57,9 +63,10 @@ public class ApplicationDispatcher {
             chatController = loader.getController();
             chatController.setApplicationDispatcher(this);
             stage.setScene(new Scene(root));
-        } catch (IOException ex) {//TODO logger
+        } catch (IOException ex) {
+            LOG.error("Failure during switching to Chat scene");
+            LOG.error("Error stack:\n" + ex);
             IOUtils.closeQuietly(stream);
-            ex.printStackTrace();
         }
     }
 
@@ -77,5 +84,9 @@ public class ApplicationDispatcher {
 
     public ChatController getChatController() {
         return chatController;
+    }
+
+    public LoginController getLoginController() {
+        return loginController;
     }
 }
