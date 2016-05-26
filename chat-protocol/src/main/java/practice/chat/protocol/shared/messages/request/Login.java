@@ -7,8 +7,7 @@ import practice.chat.protocol.shared.messages.Message;
  */
 public class Login implements Message {
 
-
-    String login;
+    private String login;
 
     public Login(String login) {
         this.login = login;

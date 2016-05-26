@@ -25,6 +25,7 @@ public final class Chat {
     private Chat(Server server) {
         this.server = server;
         rooms.put("MainRoom", new Room("MainRoom", this));
+        System.out.println(rooms);
     }
 
     static Chat initInstance(Server server) {
@@ -38,7 +39,7 @@ public final class Chat {
         return chat;
     }
 
-    static Chat getInstance(){
+    static Chat getInstance() {
         if (chat == null) {
             throw new IllegalStateException("Chat is not initialized");
         }
@@ -50,23 +51,27 @@ public final class Chat {
         client.start();
     }
 
+    boolean isLoginOccupied(String login) {
+        return chatUsers.contains(login);
+    }
+
     void addToMainRoom(Client client) {
         String login = client.getLogin();
-        if (chatUsers.add(login)) {
-            rooms.get("MainRoom").addUser(client);
-        } else {
-            client.sendMessage(new ViolatedLoginUniqueConstraint(login));
-        }
+        chatUsers.add(login);
+        rooms.get("MainRoom").addUser(client);
     }
 
     void removeUserFromChat(Client client) {
-        server.decreaseConnectionsCounter(client.getLogin());
-        chatUsers.remove(client.getName());
+        server.decreaseConnectionsCounter();
+        String login = client.getLogin();
         Room currentRoom = client.getRoom();
-        currentRoom.removeUser(client);
-        synchronized (rooms) {
-            if (currentRoom.isEmpty()) {
-                closeRoom(client, currentRoom);
+        if (currentRoom != null && login != null) {
+            chatUsers.remove(client.getLogin());
+            currentRoom.removeUser(client);
+            synchronized (rooms) {
+                if (currentRoom.isEmpty()) {
+                    closeRoom(client, currentRoom);
+                }
             }
         }
     }
@@ -75,24 +80,21 @@ public final class Chat {
         Room newRoom = new Room(roomCounter.incrementAndGet(), chat);
         rooms.put(newRoom.getName(), newRoom);
         changeRoom(client, newRoom.getName());
-
-        RoomCreated roomCreatedMessage = new RoomCreated(client.getLogin(), newRoom.getName(), new Date()); //TODO synch?
+        RoomCreated roomCreatedMessage = new RoomCreated(client.getLogin(), newRoom.getName(), new Date());
         rooms.values().forEach(r -> r.saveMessageInQueue(roomCreatedMessage));
         broadcastChatMessage(roomCreatedMessage);
-
         broadcastChatMessage(new RoomList(prepareRoomList()));
     }
 
     void changeRoom(Client client, String room) {
-        Room oldRoom;
-        Room newRoom = rooms.get(room);
-        oldRoom = client.getRoom();
-        if (newRoom == null) {
-            newRoom = oldRoom;
-        }
-        oldRoom.removeUser(client);
-        newRoom.addUser(client);
         synchronized (rooms) {
+            Room newRoom = rooms.get(room);
+            Room oldRoom = client.getRoom();
+            if (newRoom == null) {
+                newRoom = oldRoom;
+            }
+            oldRoom.removeUser(client);
+            newRoom.addUser(client);
             if (oldRoom.isEmpty()) {
                 closeRoom(client, oldRoom);
             }
@@ -121,5 +123,6 @@ public final class Chat {
 
     void stop() {
         rooms.values().forEach(Room::closeClientConnections);
+        chat = null;
     }
 }

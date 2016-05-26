@@ -8,9 +8,9 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import practice.chat.backend.Server;
-import practice.chat.controller.HistoryWindowController;
+import practice.chat.controller.HistoryController;
 import practice.chat.controller.ServerController;
-import practice.chat.utils.IOUtils;
+import practice.chat.protocol.shared.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,65 +20,67 @@ import java.io.InputStream;
  */
 public class ApplicationDispatcher {
 
-    public Server server;
-
-    private Stage stage;
-    private HistoryWindowController historyWindowController;
-    private ServerController serverController;
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationDispatcher.class);
 
+    private final Stage stage;
+
+    private Server server;
+    private HistoryController historyController;
+    private ServerController serverController;
+    private Scene serverScene;
 
     public ApplicationDispatcher(Stage stage) {
         this.stage = stage;
         this.stage.setTitle("Chat Server");
+        stage.setResizable(false);
         this.stage.show();
         this.stage.setOnCloseRequest(e -> closeApp());
+        loadServerFXMLResources();
     }
 
     public void createServerChatWindow() {
-        InputStream stream = null;
-        try {
-            String fxmlFile = "/fxml/serverScene.fxml";
-            FXMLLoader loader = new FXMLLoader();
-            stream = getClass().getResourceAsStream(fxmlFile);
-            Parent root = loader.load(stream);
-            serverController = loader.getController();
-            serverController.setApplicationDispatcher(this);
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException ex) {
-            LOG.error("Unable to create server main window scene\n");
-            LOG.error("Error stack:\n" + ex);
-        } finally {
-            IOUtils.closeQuietly(stream);
-        }
+        stage.setScene(serverScene);
     }
 
     public void openHistoryWindow(String fileName) {
         InputStream stream = null;
         try {
-            String fxmlFile = "/fxml/historyScene.fxml";
             FXMLLoader loader = new FXMLLoader();
-            stream = getClass().getResourceAsStream(fxmlFile);
+            stream = getClass().getResourceAsStream("/fxml/historyScene.fxml");
             Parent root = loader.load(stream);
-            Stage window = new Stage();
-            window.setScene(new Scene(root));
-            window.show();
-            historyWindowController = loader.getController();
-            historyWindowController.setRoomLabel(fileName);
-            historyWindowController.showHistory();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setResizable(false);
+            historyController = loader.getController();
+            historyController.setRoomLabel(fileName);
+            historyController.showHistory();
         } catch (IOException ex) {
-            LOG.error("Unable to open history window\n");
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Unable to load resources", ex);
         } finally {
             IOUtils.closeQuietly(stream);
         }
+    }
 
+    private void loadServerFXMLResources() {
+        InputStream stream = null;
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            stream = getClass().getResourceAsStream("/fxml/serverScene.fxml");
+            Parent root = loader.load(stream);
+            serverController = loader.getController();
+            serverController.setApplicationDispatcher(this);
+            serverScene = new Scene(root);
+        } catch (IOException ex) {
+            LOG.error("Unable to load resources", ex);
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
     }
 
     public void closeApp() {
         Platform.exit();
-        if(server!=null) {
+        if (server != null) {
             server.shutdown();
         }
     }
@@ -87,8 +89,11 @@ public class ApplicationDispatcher {
         return serverController;
     }
 
-    public HistoryWindowController getHistoryWindowController() {
-        return historyWindowController;
+    public Server getServer() {
+        return server;
     }
 
+    public void setServer(Server server) {
+        this.server = server;
+    }
 }

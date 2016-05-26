@@ -28,13 +28,13 @@
       </font>
     </Label>
     <Label id="login" alignment="CENTER" contentDisplay="CENTER" font="$x2" layoutX="502.0" layoutY="21.0" prefWidth="160.0" text="Room history" />
-    <Button id="updateHistoryListButton" font="$x1" layoutX="516.0" layoutY="107.0" mnemonicParsing="false" onAction="#handleUpdateHistoryListButton" prefWidth="132.0" text="Update history list" />
-    <Label font="$x1" layoutX="151.0" layoutY="21.0" prefWidth="121.0" text="Connections amount:">
+    <Button id="updateHistoryListButton" font="$x1" layoutX="516.0" layoutY="107.0" mnemonicParsing="false" onAction="#handleUpdateHistoryListButton" prefWidth="132.0" text="Update room list" />
+    <Label font="$x1" layoutX="151.0" layoutY="21.0" prefWidth="76.0" text="Connections:">
       <textFill>
         <Color blue="0.000" green="1.000" red="0.322" fx:id="x3" />
       </textFill>
     </Label>
-    <Label fx:id="connectionsAmount" font="$x1" layoutX="279.0" layoutY="21.0" prefWidth="47.0" text="" textFill="$x3" />
+    <Label fx:id="connectionsAmount" font="$x1" layoutX="227.0" layoutY="21.0" prefWidth="47.0" text="" textFill="$x3" />
     <TextField fx:id="portField" layoutX="535.0" layoutY="367.0" prefWidth="93.0" text="1234" />
     <Label alignment="CENTER" contentDisplay="CENTER" font="$x2" layoutX="566.0" layoutY="347.0" text="Port:" textAlignment="CENTER" />
   </children>

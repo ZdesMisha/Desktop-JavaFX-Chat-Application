@@ -7,7 +7,8 @@ import practice.chat.protocol.shared.messages.TextMessage;
 import practice.chat.protocol.shared.messages.request.ChangeRoom;
 import practice.chat.protocol.shared.messages.request.CreateRoom;
 import practice.chat.protocol.shared.messages.request.Login;
-import practice.chat.utils.IOUtils;
+import practice.chat.protocol.shared.messages.response.info.ViolatedLoginUniqueConstraint;
+import practice.chat.protocol.shared.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,33 +21,33 @@ import java.util.Date;
  */
 public class Client extends Thread {
 
-    private Socket socket;
+    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
+
+    private final Socket socket;
+    private final Chat chat;
+
     private String login;
     private Room room;
-    private Chat chat;
+
     private ObjectOutputStream output;
     private ObjectInputStream input;
 
-    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
-
-     Client(Socket socket) {
+    Client(Socket socket) {
         this.socket = socket;
         this.chat = Chat.getInstance();
     }
 
     @Override
     public void run() {
-        Message message;
         try {
             output = new ObjectOutputStream(socket.getOutputStream());
             input = new ObjectInputStream(socket.getInputStream());
             while (true) {
-                message = (Message) input.readObject();
+                Message message = (Message) input.readObject();
                 processMessage(message);
             }
         } catch (Exception ex) {
-            LOG.error("Connection failure with host: " + socket);
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Connection failure with host: {}", socket, ex);
         } finally {
             chat.removeUserFromChat(this);
             closeConnection();
@@ -62,8 +63,13 @@ public class Client extends Thread {
 
         } else if (message instanceof Login) {
 
-            login = ((Login) message).getLogin();
-            chat.addToMainRoom(this);
+            String loginToCheck = ((Login) message).getLogin();
+            if (chat.isLoginOccupied(loginToCheck)) {
+                sendMessage(new ViolatedLoginUniqueConstraint(loginToCheck));
+            } else {
+                login = loginToCheck;
+                chat.addToMainRoom(this);
+            }
 
         } else if (message instanceof CreateRoom) {
 
@@ -81,19 +87,18 @@ public class Client extends Thread {
     void closeConnection() {
         synchronized (this) {
             IOUtils.closeQuietly(output);
+            IOUtils.closeQuietly(input);
+            IOUtils.closeQuietly(socket);
         }
-        IOUtils.closeQuietly(input);
-        IOUtils.closeQuietly(socket);
     }
 
     void sendMessage(Message message) {
         try {
-            synchronized (this) {
+            synchronized (this) { //TODO need ???
                 output.writeObject(message);
             }
         } catch (IOException ex) {
-            LOG.error("Unable to send message " + message);
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Unable to send message: {}", message, ex);
         }
     }
 
@@ -107,9 +112,6 @@ public class Client extends Thread {
 
     void setRoom(Room room) {
         this.room = room;
-    }
-     Socket getSocket() {
-        return socket;
     }
 
 

@@ -2,7 +2,6 @@ package practice.chat.backend;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javafx.application.Platform;
 import practice.chat.controller.ChatController;
 import practice.chat.protocol.shared.messages.Message;
 import practice.chat.protocol.shared.messages.TextMessage;
@@ -11,7 +10,7 @@ import practice.chat.protocol.shared.messages.response.info.CurrentRoom;
 import practice.chat.protocol.shared.messages.response.info.RoomList;
 import practice.chat.protocol.shared.messages.response.info.UserList;
 import practice.chat.protocol.shared.messages.response.info.ViolatedLoginUniqueConstraint;
-import practice.chat.utils.IOUtils;
+import practice.chat.protocol.shared.utils.IOUtils;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -20,17 +19,20 @@ import java.net.Socket;
 
 public class Client extends Thread {
 
-    private String login;
-    private String ip;
-    private short port;
+    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
+
+    private final String login;
+    private final String ip;
+    private final int port;
+    private final ChatController chatController;
+
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
-    private ChatController chatController;
-    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
 
+    private volatile boolean connected;
 
-    public Client(String login, String ip, short port, ChatController chatController) {
+    public Client(String login, String ip, int port, ChatController chatController) {
         this.login = login;
         this.ip = ip;
         this.port = port;
@@ -38,51 +40,67 @@ public class Client extends Thread {
     }
 
     public void close() {
-        IOUtils.closeQuietly(output);
-        IOUtils.closeQuietly(input);
-        IOUtils.closeQuietly(socket);
+        synchronized (this) {
+            IOUtils.closeQuietly(output);
+            IOUtils.closeQuietly(input);
+            IOUtils.closeQuietly(socket);
+        }
+
+        connected = false;
     }
 
     public void establishConnection() throws Exception {
-        InetAddress address;
-        address = InetAddress.getByName(ip);
+
+        InetAddress address = InetAddress.getByName(ip);
+
         socket = new Socket(address, port);
         output = new ObjectOutputStream(socket.getOutputStream());
         input = new ObjectInputStream(socket.getInputStream());
+
+        connected = true;
     }
 
     public void sendMessage(Message message) {
+        if (!connected) {
+            throw new IllegalStateException("Connection not established");
+        }
         try {
-            output.writeObject(message);
+            synchronized (this) {
+                output.writeObject(message);
+            }
         } catch (IOException ex) {
-            LOG.error("Failure during sending message " + message);
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Failure during sending message {}", message, ex);
         }
     }
 
     public void run() {
-        Message message;
+        if (!connected) {
+            throw new IllegalStateException("Connection not established");
+        }
+        String disconnectReason = "Disconnected";
         try {
             sendMessage(new Login(login));
-            while (true) {
-                message = (Message) input.readObject();
-                processMessage(message);
+            while (connected) {
+                ProcessResult processResult = processMessage((Message) input.readObject());
+                if (processResult.disconnectRequested) {
+                    connected = false;
+                    disconnectReason = processResult.disconnectReason;
+                }
             }
         } catch (Exception ex) {
-            LOG.error("Connection failure occurred during message listening");
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Connection failure occurred during message listening", ex);
         } finally {
-            chatController.onDisconnect();
-            close(); //TODO how to avoid it?
+            chatController.onDisconnect(disconnectReason);
+            close();
         }
     }
 
-    private void processMessage(Message message) {
+    private ProcessResult processMessage(Message message) {
 
         if (message instanceof ViolatedLoginUniqueConstraint) {
 
-            close(); //TODO notify client about error message
-
+            return new ProcessResult(true,
+                    "Disconnect\n" + ((ViolatedLoginUniqueConstraint) message).getLogin() + " login is already in use");
 
         } else if (message instanceof UserList) {
 
@@ -94,13 +112,27 @@ public class Client extends Thread {
 
         } else if (message instanceof CurrentRoom) {
 
-            String room = ((CurrentRoom) message).getRoomName();
-            chatController.updateRoom(room);
+            chatController.updateRoom(((CurrentRoom) message).getRoomName());
 
         } else if (message instanceof TextMessage) {
 
             chatController.displayMessage((TextMessage) message);
 
+        }
+        return new ProcessResult();
+    }
+
+    private class ProcessResult {
+
+        private boolean disconnectRequested;
+        private String disconnectReason;
+
+        ProcessResult() {
+        }
+
+        ProcessResult(boolean disconnectRequested, String disconnectReason) {
+            this.disconnectRequested = disconnectRequested;
+            this.disconnectReason = disconnectReason;
         }
     }
 }

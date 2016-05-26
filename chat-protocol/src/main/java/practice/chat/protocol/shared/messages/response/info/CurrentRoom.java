@@ -7,7 +7,7 @@ import practice.chat.protocol.shared.messages.Message;
  */
 public class CurrentRoom implements Message {
 
-    String roomName;
+    private String roomName;
 
     public CurrentRoom(String roomName) {
         this.roomName = roomName;
@@ -17,7 +17,4 @@ public class CurrentRoom implements Message {
         return roomName;
     }
 
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
 }

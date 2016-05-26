@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import practice.chat.backend.Client;
 import practice.chat.controller.ChatController;
 import practice.chat.controller.LoginController;
-import practice.chat.utils.IOUtils;
+import practice.chat.protocol.shared.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,11 +20,14 @@ import java.io.InputStream;
  */
 public class ApplicationDispatcher {
 
-    public Client client;
+
+    private Client client;
 
     private Stage stage;
     private ChatController chatController;
-    private LoginController loginController;
+    private Scene loginScene;
+    private Scene chatScene;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationDispatcher.class);
 
@@ -32,44 +35,52 @@ public class ApplicationDispatcher {
     public ApplicationDispatcher(Stage stage) { //TODO how to move on center
         this.stage = stage;
         this.stage.setTitle("Chat application");
+        stage.setResizable(false);
         this.stage.show();
         this.stage.setOnCloseRequest(e -> closeApplication());
+        loadChatController();
+        loadLoginController();
     }
 
     public void switchToLogin() {
-        InputStream stream = null;
-        try {
-            String fxmlFile = "/fxml/loginScene.fxml";
-            FXMLLoader loader = new FXMLLoader();
-            stream = getClass().getResourceAsStream(fxmlFile);
-            Parent root = loader.load(stream);
-            loginController = loader.getController();
-            loginController.setApplicationDispatcher(this);
-            stage.setScene(new Scene(root));
-        } catch (IOException ex) {
-            LOG.error("Failure during switching to Login scene");
-            LOG.error("Error stack:\n" + ex);
-            IOUtils.closeQuietly(stream);
-        }
+        Platform.runLater(() -> stage.setScene(loginScene));
     }
 
     public void switchToChat() {
+        stage.setScene(chatScene);
+    }
+
+    private void loadChatController() {
         InputStream stream = null;
         try {
-            String fxmlFile = "/fxml/chatScene.fxml";
             FXMLLoader loader = new FXMLLoader();
-            stream = getClass().getResourceAsStream(fxmlFile);
+            stream = getClass().getResourceAsStream("/fxml/chatScene.fxml");
             Parent root = loader.load(stream);
             chatController = loader.getController();
             chatController.setApplicationDispatcher(this);
-            stage.setScene(new Scene(root));
+            chatScene = new Scene(root);
         } catch (IOException ex) {
-            LOG.error("Failure during switching to Chat scene");
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Unable to load resources", ex);
+        } finally {
             IOUtils.closeQuietly(stream);
         }
     }
 
+    private void loadLoginController() {
+        InputStream stream = null;
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            stream = getClass().getResourceAsStream("/fxml/loginScene.fxml");
+            Parent root = loader.load(stream);
+            LoginController loginController = loader.getController();
+            loginController.setApplicationDispatcher(this);
+            loginScene = new Scene(root);
+        } catch (IOException ex) {
+            LOG.error("Unable to load resources", ex);
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
 
     public void closeApplication() {
         Platform.exit();
@@ -78,15 +89,19 @@ public class ApplicationDispatcher {
         }
     }
 
-    public void injectLoginLabel(String login) {
-        chatController.login.setText(login);
+    public Client getClient() { //TODO change to get instance?
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public void setLoginLabel(String login) {
+        chatController.setLogin(login);
     }
 
     public ChatController getChatController() {
         return chatController;
-    }
-
-    public LoginController getLoginController() {
-        return loginController;
     }
 }

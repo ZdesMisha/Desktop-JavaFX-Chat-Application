@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static practice.chat.history.HistoryWriter.writeHistory;
+import static practice.chat.history.HistoryManager.writeHistory;
 
 /**
  * Created by misha on 04.05.16.

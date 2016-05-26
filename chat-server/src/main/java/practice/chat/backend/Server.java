@@ -3,7 +3,7 @@ package practice.chat.backend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import practice.chat.controller.ServerController;
-import practice.chat.utils.IOUtils;
+import practice.chat.protocol.shared.utils.IOUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,12 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Server extends Thread {
 
-    private AtomicInteger connectionCounter = new AtomicInteger(0);
-    private final int port;
-    private Chat chat;
-    private ServerSocket serverSocket;
-    private ServerController serverController;
     private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+
+    private final AtomicInteger connectionCounter = new AtomicInteger(0);
+    private final ServerController serverController;
+    private final int port;
+
+    private ServerSocket serverSocket;
 
     public Server(int port, ServerController controller) {
         this.port = port;
@@ -32,7 +33,7 @@ public class Server extends Thread {
     }
 
     public void run() {
-        chat = Chat.initInstance(this);
+        Chat chat = Chat.initInstance(this);
         try {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -42,10 +43,11 @@ public class Server extends Thread {
                 serverController.updateConnectionsAmountLabel(connectionCounter.get());
             }
         } catch (IOException ex) {
-            LOG.error("Error stack:\n" + ex);
+            LOG.error("Error stack:" + ex);
             serverController.onServerFailure();
         } finally {
             chat.stop();
+            IOUtils.closeQuietly(serverSocket);
         }
     }
 
@@ -54,13 +56,10 @@ public class Server extends Thread {
         IOUtils.closeQuietly(serverSocket);
     }
 
-    public void emergencyShutdown() { //TODO test
-        chat.stop();
-    }
 
-    void decreaseConnectionsCounter(String disconnectedClient) {
+    void decreaseConnectionsCounter() {
         serverController.updateConnectionsAmountLabel(connectionCounter.decrementAndGet());
-        serverController.displayMessage("Socket closed for: " + disconnectedClient);
+        serverController.displayMessage("Socket closed");
     }
 
 }

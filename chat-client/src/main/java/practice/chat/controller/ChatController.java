@@ -10,7 +10,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import practice.chat.dispatcher.ApplicationDispatcher;
 import practice.chat.protocol.shared.messages.TextMessage;
-import practice.chat.protocol.shared.messages.common.SimpleTextMessage;
+import practice.chat.protocol.shared.messages.common.UserTextMessage;
 import practice.chat.protocol.shared.messages.request.ChangeRoom;
 import practice.chat.protocol.shared.messages.request.CreateRoom;
 import practice.chat.protocol.shared.messages.response.text.NewUser;
@@ -23,6 +23,11 @@ import java.util.List;
  */
 public class ChatController {
 
+    private static final int MAX_MESSAGE_LENGTH = 300;
+
+    private static final TextFormatter<String> textLengthFormatter = new TextFormatter<>(c -> c
+            .getControlNewText().length() > MAX_MESSAGE_LENGTH ? null : c);
+
     @FXML
     private TextFlow chatDisplay;
     @FXML
@@ -32,19 +37,15 @@ public class ChatController {
     @FXML
     private Label userAmount;
     @FXML
-    ScrollPane inputTextScroll;
+    private ScrollPane inputTextScroll;
+    @FXML
+    private Label room;
+    @FXML
+    private Label login;
+    @FXML
+    private ChoiceBox<String> roomChoice;
 
-    public Label room;
-
-    public Label login;
-
-    public ChoiceBox<String> roomChoice;
-
-
-    private TextFormatter<String> textLengthFormatter = new TextFormatter<>(c -> c
-            .getControlNewText().length() > 300 ? null : c);
-
-    public ApplicationDispatcher applicationDispatcher;
+    private ApplicationDispatcher applicationDispatcher;
 
     @FXML
     public void initialize() {
@@ -63,7 +64,7 @@ public class ChatController {
     public void handleCreateRoomButton() {
         userList.clear();
         chatDisplay.getChildren().clear();
-        applicationDispatcher.client.sendMessage(new CreateRoom(login.getText()));
+        applicationDispatcher.getClient().sendMessage(new CreateRoom());
 
     }
 
@@ -75,18 +76,18 @@ public class ChatController {
         }
         userList.clear();
         chatDisplay.getChildren().clear();
-        applicationDispatcher.client.sendMessage(new ChangeRoom(roomToJoin));
+        applicationDispatcher.getClient().sendMessage(new ChangeRoom(roomToJoin));
 
     }
 
     public void handleLogoutButton() {
-        applicationDispatcher.client.close();
+        applicationDispatcher.getClient().close();
     }
 
     public void handleSendButton() {
         String message = textField.getText();
         if (isValidMessage(message)) {
-            applicationDispatcher.client.sendMessage(new SimpleTextMessage(login.getText(), message));
+            applicationDispatcher.getClient().sendMessage(new UserTextMessage(login.getText(), message));
             textField.clear();
         }
     }
@@ -112,10 +113,13 @@ public class ChatController {
         });
     }
 
-    public void onDisconnect() {
+    public void onDisconnect(String error) {
+        applicationDispatcher.switchToLogin();
         Platform.runLater(() -> {
-            applicationDispatcher.switchToLogin();
-            showAlertBox("Disconnected");
+            userList.clear();
+            chatDisplay.getChildren().clear();
+            roomChoice.getItems().clear();
+            showAlertBox(error);
         });
     }
 
@@ -151,9 +155,13 @@ public class ChatController {
         return message.matches(".+");
     }
 
-    public void showAlertBox(String message) {
+    private void showAlertBox(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText(message);
         alert.show();
+    }
+
+    public void setLogin(String login) {
+        this.login.setText(login);
     }
 }

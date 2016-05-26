@@ -6,9 +6,4 @@ import practice.chat.protocol.shared.messages.Message;
  * Created by misha on 20.05.16.
  */
 public class CreateRoom implements Message {
-    String login;
-
-    public CreateRoom(String login) {
-        this.login = login;
-    }
 }

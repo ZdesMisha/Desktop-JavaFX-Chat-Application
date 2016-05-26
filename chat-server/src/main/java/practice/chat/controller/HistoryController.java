@@ -5,28 +5,23 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import practice.chat.dispatcher.ApplicationDispatcher;
-import practice.chat.history.HistoryReader;
 
 import java.util.List;
 import java.util.Optional;
 
-import static practice.chat.history.HistoryReader.readHistory;
+import static practice.chat.history.HistoryManager.readHistory;
 
 /**
  * Created by misha on 18.05.16.
  */
-public class HistoryWindowController {
+public class HistoryController {
 
     @FXML
-    public Label fileName;
-
+    private Label fileName;
     @FXML
-    public Button nextButton;
-
+    private Button nextButton;
     @FXML
-    public Button previousButton;
-
+    private Button previousButton;
     @FXML
     private TextArea textArea;
 
@@ -39,12 +34,11 @@ public class HistoryWindowController {
 
     public void handlePreviousButton() {
         nextButton.setDisable(false);
+        page--;
+        showHistory();
         if (page <= 1) {
             previousButton.setDisable(true);
-        } else {
-            page--;
         }
-        showHistory();
     }
 
     public void handleNextButton() {
@@ -55,26 +49,28 @@ public class HistoryWindowController {
 
     public void showHistory() {
         textArea.clear();
-        Optional<List<String>> history = readHistory(fileName.getText(), page); //TODO to read about optional
+        Optional<List<String>> history = readHistory(fileName.getText(), page);
         if (history.isPresent()) {
             if (history.get().isEmpty()) {
                 nextButton.setDisable(true);
+                textArea.appendText("End of file");
             } else {
                 for (String line : history.get()) {
                     textArea.appendText(line + "\n");
                 }
             }
         } else {
-            showAlertBox("File is not exist");
+            showAlertBox("File does not exist");
         }
     }
+
     private void showAlertBox(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setContentText(message);
         alert.show();
     }
 
-    public void setRoomLabel(String name){
+    public void setRoomLabel(String name) {
         fileName.setText(name);
     }
 

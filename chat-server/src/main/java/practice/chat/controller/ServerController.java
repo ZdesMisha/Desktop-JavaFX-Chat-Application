@@ -10,12 +10,19 @@ import practice.chat.backend.Server;
 
 import java.util.List;
 
-import static practice.chat.history.HistoryReader.getHistoryFileNames;
+import static practice.chat.history.HistoryManager.getHistoryFileNames;
 
 /**
  * Created by misha on 17.05.16.
  */
 public class ServerController {
+
+    private static final String PORT_FORMAT_PATTERN = "^(\\d{0,5})?$";
+    private static final String VALID_PATTERN = "\\d+";
+    private static final TextFormatter<String> portFieldFormatter = new TextFormatter<>(c -> c
+            .getControlNewText().matches(PORT_FORMAT_PATTERN) ? c : null);
+
+    private static final Logger LOG = LoggerFactory.getLogger(ServerController.class);
 
     @FXML
     private TextArea serverLog;
@@ -27,20 +34,10 @@ public class ServerController {
     public Label connectionsAmount;
     @FXML
     private TextField portField;
-
-    public ChoiceBox<String> roomChoice;
+    @FXML
+    private ChoiceBox<String> roomChoice;
 
     private ApplicationDispatcher applicationDispatcher;
-
-    private static final String PORT_FORMAT_PATTERN =
-            "^(\\d{0,5})?$";
-    private static final String VALID_PATTERN = "\\d+";
-
-    private TextFormatter<String> portFieldFormatter = new TextFormatter<>(c -> c
-            .getControlNewText().matches(PORT_FORMAT_PATTERN) ? c : null);
-
-    private static final Logger LOG = LoggerFactory.getLogger(Server.class);
-
 
     @FXML
     public void initialize() {
@@ -49,23 +46,21 @@ public class ServerController {
         updateRoomList(getHistoryFileNames());
     }
 
-
     public void handleRunButton() {
         String port = portField.getText();
 
         if (!isValidPort(port)) {
-            showAlertBox("Port value must be more that 1024 \n" +
-                    "and less than 65536");
+            showAlertBox("Port value must be more that 1024 \nand less than 65536");
         } else {
             displayMessage("Starting server...");
-            applicationDispatcher.server = new Server(Integer.parseInt(port), applicationDispatcher.getServerController());
+            applicationDispatcher.setServer(new Server(Integer.parseInt(port),
+                    applicationDispatcher.getServerController()));
             try {
-                applicationDispatcher.server.initServerSocket();
-                applicationDispatcher.server.start();
+                applicationDispatcher.getServer().initServerSocket();
+                applicationDispatcher.getServer().start();
                 onServerStart();
             } catch (Exception ex) {
-                LOG.error("Unable to initialize server socket");
-                LOG.error("Error stack: \n" + ex);
+                LOG.error("Unable to initialize server socket", ex);
                 showAlertBox("Unable to start server");
                 onServerFailure();
             }
@@ -77,12 +72,12 @@ public class ServerController {
     }
 
     public void handleShutdownButton() {
-        applicationDispatcher.server.shutdown();
+        applicationDispatcher.getServer().shutdown();
     }
 
     public void handleShowHistoryButton() {
         if (roomChoice.getValue() == null) {
-            showAlertBox("You have to chose room!");
+            showAlertBox("You have to chose file!");
         } else {
             applicationDispatcher.openHistoryWindow(roomChoice.getValue());
         }
@@ -90,14 +85,12 @@ public class ServerController {
 
     public void displayMessage(String message) {
         serverLog.appendText(message + "\n");
-        LOG.info(message + "\n");
+        LOG.info(message);
     }
 
     private void updateRoomList(List<String> rooms) {
         roomChoice.getItems().clear();
-        for (String room : rooms) {
-            roomChoice.getItems().add(room);
-        }
+        rooms.forEach(room -> roomChoice.getItems().add(room));
     }
 
     public void updateConnectionsAmountLabel(int amount) {
@@ -118,13 +111,11 @@ public class ServerController {
             runButton.setDisable(false);
             shutdownButton.setDisable(true);
             portField.setDisable(false);
-            displayMessage("SERVER IS DOWN");
+            displayMessage("SERVER IS DOWN!");
         });
-
-
     }
 
-    private boolean isValidPort(String port) {
+    private static boolean isValidPort(String port) {
         if (!port.matches(VALID_PATTERN)) {
             return false;
         }
@@ -141,5 +132,4 @@ public class ServerController {
     public void setApplicationDispatcher(ApplicationDispatcher applicationDispatcher) {
         this.applicationDispatcher = applicationDispatcher;
     }
-
 }

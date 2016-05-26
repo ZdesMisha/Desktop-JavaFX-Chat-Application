@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by misha on 20.05.16.
  */
-public class UserList  implements Message {
+public class UserList implements Message {
 
     private List<String> userList;
 
@@ -19,7 +19,4 @@ public class UserList  implements Message {
         return userList;
     }
 
-    public void setUserList(List<String> userList) {
-        this.userList = userList;
-    }
 }

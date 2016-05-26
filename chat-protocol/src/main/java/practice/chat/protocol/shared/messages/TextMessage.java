@@ -3,22 +3,28 @@ package practice.chat.protocol.shared.messages;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static java.lang.String.format;
+
 /**
  * Created by misha on 20.05.16.
  */
-public class TextMessage implements Message {
+public abstract class TextMessage implements Message {
 
     private static final String DATE_FORMAT = "HH:mm:ss dd/MM/yyyy";
 
-    protected String login;
-    protected String message;
-    protected String date;
+    private String login;
+    private String message;
+    private Date date;
 
-    public TextMessage() {
+    public TextMessage(String login, String message) {
+        this.login = login;
+        this.message = message;
     }
 
-    public TextMessage(String message) {
+    public TextMessage(String login, String message, Date date) {
+        this.login = login;
         this.message = message;
+        this.date = date;
     }
 
     public String getLogin() {
@@ -29,7 +35,6 @@ public class TextMessage implements Message {
         this.login = login;
     }
 
-
     public String getMessage() {
         return message;
     }
@@ -39,11 +44,16 @@ public class TextMessage implements Message {
     }
 
     public void setDate(Date date) {
-        this.date = new SimpleDateFormat(DATE_FORMAT).format(date);
+        this.date = date;
+    }
+
+    private static String formatDate(Date date) {
+        return new SimpleDateFormat(DATE_FORMAT).format(date);
     }
 
     @Override
     public String toString() {
-        return "[" + date + "] " + login + ": " + message;
+        return format("[%s] %s: %s", formatDate(date), login, message);
     }
+
 }

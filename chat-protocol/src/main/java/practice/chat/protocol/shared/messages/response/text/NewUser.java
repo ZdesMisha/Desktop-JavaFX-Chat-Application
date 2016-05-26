@@ -9,9 +9,7 @@ import java.util.Date;
  */
 public class NewUser extends TextMessage {
 
-    public NewUser(String login,Date date) {
-        this.login = login;
-        this.message = "has joined chat";
-        setDate(date);
+    public NewUser(String login, Date date) {
+        super(login, "has joined chat", date);
     }
 }

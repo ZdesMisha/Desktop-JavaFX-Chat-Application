@@ -9,9 +9,8 @@ import java.util.Date;
  */
 public class UserLeft extends TextMessage {
 
-    public UserLeft(String login,Date date) {
-        this.login = login;
-        this.message = "has left room";
-        setDate(date);
+    public UserLeft(String login, Date date) {
+        super(login, "has left room", date);
     }
+
 }

@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by misha on 20.05.16.
  */
-public class RoomList  implements Message {
+public class RoomList implements Message {
 
     private List<String> roomList;
 
@@ -19,7 +19,4 @@ public class RoomList  implements Message {
         return roomList;
     }
 
-    public void setRoomList(List<String> roomList) {
-        this.roomList = roomList;
-    }
 }
