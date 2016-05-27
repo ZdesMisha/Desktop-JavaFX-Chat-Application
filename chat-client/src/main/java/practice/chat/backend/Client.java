@@ -40,17 +40,15 @@ public class Client extends Thread {
     }
 
     public void close() {
+        connected = false;
         synchronized (this) {
             IOUtils.closeQuietly(output);
             IOUtils.closeQuietly(input);
             IOUtils.closeQuietly(socket);
         }
-
-        connected = false;
     }
 
     public void establishConnection() throws Exception {
-
         InetAddress address = InetAddress.getByName(ip);
 
         socket = new Socket(address, port);
@@ -87,6 +85,8 @@ public class Client extends Thread {
                     disconnectReason = processResult.disconnectReason;
                 }
             }
+        } catch (EOFException ex) {
+            LOG.info("Socket closed: {}", ex.getMessage());
         } catch (Exception ex) {
             LOG.error("Connection failure occurred during message listening", ex);
         } finally {

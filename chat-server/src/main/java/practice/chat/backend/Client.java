@@ -10,6 +10,7 @@ import practice.chat.protocol.shared.messages.request.Login;
 import practice.chat.protocol.shared.messages.response.info.ViolatedLoginUniqueConstraint;
 import practice.chat.protocol.shared.utils.IOUtils;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -46,6 +47,8 @@ public class Client extends Thread {
                 Message message = (Message) input.readObject();
                 processMessage(message);
             }
+        } catch (EOFException ex) {
+            LOG.info("Socket closed: {}", ex.getMessage());
         } catch (Exception ex) {
             LOG.error("Connection failure with host: {}", socket, ex);
         } finally {

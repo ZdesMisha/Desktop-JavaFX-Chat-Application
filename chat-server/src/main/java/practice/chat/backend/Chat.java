@@ -17,15 +17,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class Chat {
 
     private static volatile Chat chat;
-    private Server server;
-    private AtomicInteger roomCounter = new AtomicInteger(0);
+    private final Server server;
+    private final AtomicInteger roomCounter = new AtomicInteger(0);
     private final Map<String, Room> rooms = new ConcurrentHashMap<>();
     private final Set<String> chatUsers = ConcurrentHashMap.newKeySet();
 
     private Chat(Server server) {
         this.server = server;
         rooms.put("MainRoom", new Room("MainRoom", this));
-        System.out.println(rooms);
     }
 
     static Chat initInstance(Server server) {

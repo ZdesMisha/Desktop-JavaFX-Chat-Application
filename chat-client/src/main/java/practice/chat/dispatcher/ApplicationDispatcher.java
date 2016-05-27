@@ -32,7 +32,7 @@ public class ApplicationDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationDispatcher.class);
 
 
-    public ApplicationDispatcher(Stage stage) { //TODO how to move on center
+    public ApplicationDispatcher(Stage stage) {
         this.stage = stage;
         this.stage.setTitle("Chat application");
         stage.setResizable(false);

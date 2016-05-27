@@ -43,7 +43,7 @@ public class Server extends Thread {
                 serverController.updateConnectionsAmountLabel(connectionCounter.get());
             }
         } catch (IOException ex) {
-            LOG.error("Error stack:" + ex);
+            LOG.error("Error stack:",ex);
             serverController.onServerFailure();
         } finally {
             chat.stop();

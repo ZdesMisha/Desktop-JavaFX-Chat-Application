@@ -25,7 +25,6 @@ public class ApplicationDispatcher {
     private final Stage stage;
 
     private Server server;
-    private HistoryController historyController;
     private ServerController serverController;
     private Scene serverScene;
 
@@ -52,7 +51,7 @@ public class ApplicationDispatcher {
             stage.setScene(new Scene(root));
             stage.show();
             stage.setResizable(false);
-            historyController = loader.getController();
+            HistoryController historyController = loader.getController();
             historyController.setRoomLabel(fileName);
             historyController.showHistory();
         } catch (IOException ex) {
