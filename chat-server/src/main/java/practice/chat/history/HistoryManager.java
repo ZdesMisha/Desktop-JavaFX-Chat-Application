@@ -24,7 +24,7 @@ public class HistoryManager {
     private final static String HOME_DIR = System.getProperty("user.home");
     private final static String HISTORY_DIR_NAME = "ChatHistory";
     private final static String HISTORY_PATH = HOME_DIR + File.separator + HISTORY_DIR_NAME;
-    private final static int PAGE_SIZE = 25;
+    private final static int PAGE_SIZE = 50;
 
     private final static Logger LOG = LoggerFactory.getLogger(HistoryManager.class);
 
