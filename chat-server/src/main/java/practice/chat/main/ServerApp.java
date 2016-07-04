@@ -17,7 +17,6 @@ public class ServerApp extends Application {
     @Override
     public void start(Stage stage) {
         ApplicationDispatcher applicationDispatcher = new ApplicationDispatcher(stage);
-        Runtime.getRuntime().addShutdownHook(new Thread(applicationDispatcher::closeApp));
         applicationDispatcher.createServerChatWindow();
     }
 

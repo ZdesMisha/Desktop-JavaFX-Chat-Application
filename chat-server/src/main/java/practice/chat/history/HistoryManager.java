@@ -69,7 +69,7 @@ public class HistoryManager {
 
     public static List<String> getHistoryFileNames() {
 
-        ArrayList<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         Path path = Paths.get(HISTORY_PATH);
 
         try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {

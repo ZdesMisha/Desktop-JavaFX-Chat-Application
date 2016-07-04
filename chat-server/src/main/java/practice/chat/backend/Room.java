@@ -2,6 +2,7 @@ package practice.chat.backend;
 
 
 import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import practice.chat.protocol.shared.messages.Message;
 import practice.chat.protocol.shared.messages.TextMessage;
@@ -98,7 +99,9 @@ public class Room {
     }
 
     private void sendRecentMessages(Client client) {
-        recentHistory.forEach(client::sendMessage);
+        synchronized (recentHistory) {
+            recentHistory.forEach(client::sendMessage);
+        }
     }
 
     String getName() {
