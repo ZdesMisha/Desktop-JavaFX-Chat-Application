@@ -1,0 +1,9 @@
+practice/chat/dispatcher/ApplicationDispatcher.class
+practice/chat/controller/HistoryController.class
+practice/chat/controller/ServerController.class
+practice/chat/backend/Server.class
+practice/chat/backend/Chat.class
+practice/chat/backend/Client.class
+practice/chat/backend/Room.class
+practice/chat/history/HistoryManager.class
+practice/chat/main/ServerApp.class

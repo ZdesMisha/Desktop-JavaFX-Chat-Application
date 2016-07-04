@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="350.0" prefWidth="450.0" xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/2.2" fx:controller="practice.chat.controller.LoginController">
+    <children>
+        <Button fx:id="joinInButton" layoutX="184.0" layoutY="248.0" mnemonicParsing="false"
+                onAction="#handleJoinInButton" prefWidth="83.0" text="Join in!"/>
+        <TextField fx:id="loginField" layoutX="163.0" layoutY="119.0" prefHeight="21.0" prefWidth="125.0" promptText=""
+                   text=""/>
+        <Label layoutX="152.0" layoutY="48.0" text="Welcome to Chat">
+            <font>
+                <Font name="System Bold" size="15.0"/>
+            </font>
+        </Label>
+        <Label layoutX="163.0" layoutY="103.0" text="Login:">
+            <font>
+                <Font name="System Bold" size="13.0" fx:id="x1"/>
+            </font>
+        </Label>
+        <Label font="$x1" layoutX="163.0" layoutY="191.0" text="Port:"/>
+        <Label font="$x1" layoutX="163.0" layoutY="149.0" text="IP address:"/>
+        <TextField fx:id="ipAddressField" layoutX="161.0" layoutY="165.0" prefHeight="21.0" prefWidth="125.0"
+                   promptText="" text="127.0.0.1"/>
+        <TextField fx:id="portField" layoutX="163.0" layoutY="207.0" prefHeight="21.0" prefWidth="125.0" promptText=""
+                   text="1234"/>
+        <Label fx:id="message" alignment="CENTER" font="$x1" layoutX="118.0" layoutY="294.0" prefWidth="211.0" text=""
+               textFill="#ff007a"/>
+    </children>
+    <padding>
+        <Insets/>
+    </padding>
+</AnchorPane>
