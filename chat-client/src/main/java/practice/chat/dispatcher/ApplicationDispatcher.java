@@ -104,4 +104,6 @@ public class ApplicationDispatcher {
     public ChatController getChatController() {
         return chatController;
     }
+
+
 }
