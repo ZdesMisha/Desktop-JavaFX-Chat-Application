@@ -60,7 +60,7 @@ public class Client extends Thread {
 
     public void sendMessage(Message message) {
         if (!connected) {
-            throw new IllegalStateException("Connection not established");
+            throw new IllegalStateException("Connection not established!");
         }
         try {
             synchronized (this) {
