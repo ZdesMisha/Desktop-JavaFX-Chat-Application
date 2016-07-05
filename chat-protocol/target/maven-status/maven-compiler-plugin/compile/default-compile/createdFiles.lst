@@ -1,0 +1,15 @@
+practice/chat/protocol/shared/utils/IOUtils.class
+practice/chat/protocol/shared/messages/request/ChangeRoom.class
+practice/chat/protocol/shared/messages/response/info/ViolatedLoginUniqueConstraint.class
+practice/chat/protocol/shared/messages/request/CreateRoom.class
+practice/chat/protocol/shared/messages/response/text/RoomClosed.class
+practice/chat/protocol/shared/messages/response/info/CurrentRoom.class
+practice/chat/protocol/shared/messages/common/UserTextMessage.class
+practice/chat/protocol/shared/messages/response/text/RoomCreated.class
+practice/chat/protocol/shared/messages/TextMessage.class
+practice/chat/protocol/shared/messages/response/text/NewUser.class
+practice/chat/protocol/shared/messages/response/info/UserList.class
+practice/chat/protocol/shared/messages/request/Login.class
+practice/chat/protocol/shared/messages/response/text/UserLeft.class
+practice/chat/protocol/shared/messages/response/info/RoomList.class
+practice/chat/protocol/shared/messages/Message.class

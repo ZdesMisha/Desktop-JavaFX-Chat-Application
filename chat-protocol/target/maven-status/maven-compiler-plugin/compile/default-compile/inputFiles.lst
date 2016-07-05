@@ -1,0 +1,15 @@
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/info/UserList.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/info/RoomList.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/TextMessage.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/text/RoomClosed.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/info/ViolatedLoginUniqueConstraint.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/common/UserTextMessage.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/request/ChangeRoom.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/utils/IOUtils.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/request/CreateRoom.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/text/RoomCreated.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/text/UserLeft.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/text/NewUser.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/response/info/CurrentRoom.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/Message.java
+/home/misha/IdeaProjects/chat-parent/chat-protocol/src/main/java/practice/chat/protocol/shared/messages/request/Login.java

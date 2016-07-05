@@ -1,0 +1,9 @@
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/main/ServerApp.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/backend/Client.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/controller/HistoryController.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/controller/ServerController.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/backend/Server.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/backend/Room.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/backend/Chat.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/dispatcher/ApplicationDispatcher.java
+/home/misha/IdeaProjects/chat-parent/chat-server/src/main/java/practice/chat/history/HistoryManager.java
